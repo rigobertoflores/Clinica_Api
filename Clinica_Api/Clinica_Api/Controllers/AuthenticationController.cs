@@ -12,7 +12,7 @@ namespace Clinica_Api.Controllers
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
-        private readonly DbOliveraContext _context;
+        private readonly DbOliveraClinicaContext _context;
         private  static string tenantId = "1013c841-bd63-4b43-941b-777e2ea80e22";
         private string clientId = "a452a240-6ce5-41e1-be76-a1eff120432f";
         private string clientSecret = "Qoh8Q~GNwEKf_REzErf-0miNl52wQWUzdSgdFbwB"; // Asegúrate de reemplazar esto con tu client secret real.
@@ -20,7 +20,7 @@ namespace Clinica_Api.Controllers
         private string scope = "openid profile User.Read";
         private string tokenUrl = $"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token";
 
-        public AuthenticationController(DbOliveraContext context)
+        public AuthenticationController(DbOliveraClinicaContext context)
         {
             _context = context;
         }

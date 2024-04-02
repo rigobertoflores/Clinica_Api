@@ -7,9 +7,11 @@ public partial class Imagene
 {
     public int Id { get; set; }
 
-    public string Letra { get; set; } = null!;
+    public string? Letra { get; set; }
 
-    public byte[] BlobData { get; set; } = null!;
+    public byte[]? BlobData { get; set; }
 
-    public string Ext { get; set; } = null!;
+    public string? Ext { get; set; }
+
+    public int? Clave { get; set; }
 }

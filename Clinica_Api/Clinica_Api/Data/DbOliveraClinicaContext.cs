@@ -36,6 +36,7 @@ public partial class DbOliveraClinicaContext : DbContext
 
     public virtual DbSet<Imagene> Imagenes { get; set; }
 
+    public virtual DbSet<Nota> Notas { get; set; }
     public virtual DbSet<Observacione> Observaciones { get; set; }
 
     public virtual DbSet<PacientesInformacionGeneral> PacientesInformacionGenerals { get; set; }
@@ -157,18 +158,10 @@ public partial class DbOliveraClinicaContext : DbContext
 
         modelBuilder.Entity<Expediente>(entity =>
         {
-            entity.HasKey(e => e.Clave).HasName("PK_pacientes_pacientes_pacientes");
-
-            entity.Property(e => e.Clave).ValueGeneratedNever();
-            entity.Property(e => e.Depto)
-                .HasMaxLength(70)
-                .HasColumnName("DEPTO");
+            entity.HasKey(e => e.Id).HasName("PK_pacientes_pacientes_pacientes");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
             entity.Property(e => e.Expediente1).HasColumnName("Expediente");
-            entity.Property(e => e.FechaDeNacimiento)
-                .HasColumnType("smalldatetime")
-                .HasColumnName("Fecha de Nacimiento");
-            entity.Property(e => e.Nombre).HasMaxLength(40);
-            entity.Property(e => e.Tema)
+            entity.Property(e => e.HistoriaId)
                 .HasMaxLength(9)
                 .HasDefaultValueSql("('Pacientes')");
         });
@@ -195,21 +188,21 @@ public partial class DbOliveraClinicaContext : DbContext
         modelBuilder.Entity<Historia>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_Historias_Historias");
-
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("ID");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.Hc).HasColumnName("HC");
             entity.Property(e => e.Nombre).HasMaxLength(50);
         });
 
         modelBuilder.Entity<Imagene>(entity =>
         {
-            entity.HasKey(e => new { e.Id, e.Letra, e.Ext }).HasName("PK_LasImagenes_LasImagenes");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.Letra).HasMaxLength(40);
             entity.Property(e => e.Ext).HasMaxLength(10);
+            entity.Property(e => e.Clave);
         });
 
         modelBuilder.Entity<Observacione>(entity =>
@@ -225,10 +218,21 @@ public partial class DbOliveraClinicaContext : DbContext
             entity.Property(e => e.O4).HasMaxLength(21);
         });
 
+        modelBuilder.Entity<Nota>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.ToTable("Notas");
+            entity.Property(e => e.Fecha)
+                .HasMaxLength(10)
+                .IsFixedLength();
+        });
+
         modelBuilder.Entity<PacientesInformacionGeneral>(entity =>
         {
-            entity.HasKey(e => e.Clave).HasName("PK_Pacientes_InformacionGeneral_Pacientes_InformacionGeneral_Pacientes_InformacionGeneral_Pacientes_InformacionGeneral");
-
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.Clave);
             entity.ToTable("Pacientes_InformacionGeneral");
 
             entity.Property(e => e.Clave).ValueGeneratedNever();
@@ -321,8 +325,8 @@ public partial class DbOliveraClinicaContext : DbContext
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Id).ValueGeneratedOnAdd();
             entity.ToTable("RecetasxPaciente");
-            entity.Property(e => e.Clave);
             entity.Property(e => e.Fecha).HasMaxLength(50);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
         });
 
         OnModelCreatingPartial(modelBuilder);
