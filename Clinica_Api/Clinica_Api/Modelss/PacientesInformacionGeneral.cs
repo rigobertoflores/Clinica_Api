@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Clinica_Api.Modelss;
 
 public partial class PacientesInformacionGeneral
 {
-    public int? Clave { get; set; }
+    [Key]
+    public int Id { get; set; }
+    public int Clave { get; set; }
 
     public string? FechaDeNacimiento { get; set; }
 

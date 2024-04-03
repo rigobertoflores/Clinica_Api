@@ -7,7 +7,7 @@ public partial class Historia
 {
     public int Id { get; set; }
 
-    public string Hc { get; set; } = null!;
+    public string? Hc { get; set; }
 
-    public string Nombre { get; set; } = null!;
+    public string? Nombre { get; set; }
 }

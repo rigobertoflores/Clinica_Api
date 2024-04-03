@@ -35,11 +35,10 @@ public partial class DbOliveraClinicaContext : DbContext
 
     public virtual DbSet<Imagene> Imagenes { get; set; }
 
+    public virtual DbSet<Nota> Notas { get; set; }
     public virtual DbSet<Observacione> Observaciones { get; set; }
 
     public virtual DbSet<PacientesInformacionGeneral> PacientesInformacionGenerals { get; set; }
-
-    public virtual DbSet<PacientesInformacionGeneral1> PacientesInformacionGenerals1 { get; set; }
 
     public virtual DbSet<Receta> Recetas { get; set; }
 
@@ -51,10 +50,12 @@ public partial class DbOliveraClinicaContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=LAPTOP-UB7952GK\\MSSQLSERVER01;Integrated Security=True;Connect Timeout=300;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Database=db_olivera_clinica;Trusted_Connection=True;");
+        => optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=master;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False;Database=db_olivera_clinica;Trusted_Connection=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.UseCollation("Modern_Spanish_CI_AS");
+
         modelBuilder.Entity<Agendum>(entity =>
         {
             entity.HasKey(e => new { e.Dia, e.Hora }).HasName("PK_Agenda_Agenda_Agenda");
@@ -158,18 +159,10 @@ public partial class DbOliveraClinicaContext : DbContext
 
         modelBuilder.Entity<Expediente>(entity =>
         {
-            entity.HasKey(e => e.Clave).HasName("PK_pacientes_pacientes_pacientes");
-
-            entity.Property(e => e.Clave).ValueGeneratedNever();
-            entity.Property(e => e.Depto)
-                .HasMaxLength(70)
-                .HasColumnName("DEPTO");
+            entity.HasKey(e => e.Id).HasName("PK_pacientes_pacientes_pacientes");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
             entity.Property(e => e.Expediente1).HasColumnName("Expediente");
-            entity.Property(e => e.FechaDeNacimiento)
-                .HasColumnType("smalldatetime")
-                .HasColumnName("Fecha de Nacimiento");
-            entity.Property(e => e.Nombre).HasMaxLength(40);
-            entity.Property(e => e.Tema)
+            entity.Property(e => e.HistoriaId)
                 .HasMaxLength(9)
                 .HasDefaultValueSql("('Pacientes')");
         });
@@ -196,21 +189,21 @@ public partial class DbOliveraClinicaContext : DbContext
         modelBuilder.Entity<Historia>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_Historias_Historias");
-
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("ID");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.Hc).HasColumnName("HC");
             entity.Property(e => e.Nombre).HasMaxLength(50);
         });
 
         modelBuilder.Entity<Imagene>(entity =>
         {
-            entity.HasKey(e => new { e.Id, e.Letra, e.Ext }).HasName("PK_LasImagenes_LasImagenes");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.Letra).HasMaxLength(40);
             entity.Property(e => e.Ext).HasMaxLength(10);
+            entity.Property(e => e.Clave);
         });
 
         modelBuilder.Entity<Observacione>(entity =>
@@ -226,12 +219,24 @@ public partial class DbOliveraClinicaContext : DbContext
             entity.Property(e => e.O4).HasMaxLength(21);
         });
 
+        modelBuilder.Entity<Nota>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.ToTable("Notas");
+            entity.Property(e => e.Fecha)
+                .HasMaxLength(10)
+                .IsFixedLength();
+        });
+
         modelBuilder.Entity<PacientesInformacionGeneral>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("Pacientes_InformacionGeneral");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.Clave);
+            entity.ToTable("Pacientes_InformacionGeneral");
 
+            entity.Property(e => e.Clave).ValueGeneratedNever();
             entity.Property(e => e.Alcoholismo).HasMaxLength(255);
             entity.Property(e => e.Alergia).HasMaxLength(255);
             entity.Property(e => e.Amigdalitis).HasMaxLength(255);
@@ -329,12 +334,11 @@ public partial class DbOliveraClinicaContext : DbContext
 
         modelBuilder.Entity<RecetasxPaciente>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Recetasx__3214EC07DBB703E1");
-
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
             entity.ToTable("RecetasxPaciente");
-
-            entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.Fecha).HasColumnType("datetime");
+            entity.Property(e => e.Fecha).HasMaxLength(50);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
         });
 
         modelBuilder.Entity<TratamientosEnfermedade>(entity =>
