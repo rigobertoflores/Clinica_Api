@@ -42,7 +42,7 @@ namespace Clinica_Api.Controllers
         [HttpGet("CliniaOvController/GetPacientes")]
         public IActionResult GetPacientes()
         {
-            var contenido = _context.PacientesInformacionGenerals.Where(x=>x.Clave==429).OrderByDescending(x => x.FechaConsulta).Take(20);
+            var contenido = _context.PacientesInformacionGenerals.Where(x => x.Clave == 429).OrderByDescending(x => x.FechaConsulta).Take(20);
 
             return Ok(contenido);
         }
@@ -50,15 +50,15 @@ namespace Clinica_Api.Controllers
         [HttpGet("CliniaOvController/GetPacienteId/{id:int}")]
         public IActionResult GetPacienteId(int id)
         {
-            var contenido = _context.PacientesInformacionGenerals.Where(x => x.Clave==id).FirstOrDefault();
+            var contenido = _context.PacientesInformacionGenerals.Where(x => x.Clave == id).FirstOrDefault();
 
             return Ok(contenido);
-        } 
+        }
 
         [HttpGet("CliniaOvController/GetImagenesPaciente/{id:int}")]
         public IActionResult GetImagenesPaciente(int id)
         {
-            List<Imagene> blobData = _context.Imagenes.Where(x=>x.Id==id).ToList();
+            List<Imagene> blobData = _context.Imagenes.Where(x => x.Id == id).ToList();
             //int i = 0;
             //if (blobData != null)
             //{
@@ -116,14 +116,14 @@ namespace Clinica_Api.Controllers
             //    {
             //        Console.WriteLine("No se encontró ningún dato de imagen para cargar.");
             //    }
-            
+
             return Ok(blobData);
         }
 
         [HttpGet("CliniaOvController/GetFotoPaciente/{id:int}")]
         public IActionResult GetFotoPaciente(int id)
         {
-            List<Foto> blobData = _context.Fotos.Where(x=>x.Id==id).ToList();            
+            List<Foto> blobData = _context.Fotos.Where(x => x.Id == id).ToList();
             return Ok(blobData);
         }
 
@@ -141,7 +141,7 @@ namespace Clinica_Api.Controllers
             if (informacionpaciente == null || !ModelState.IsValid)
             {
                 return NotFound();
-            }           
+            }
             try
             {
                 informacionpaciente.HepatitisViralTipo = paciente.HepatitisViralTipo;
@@ -210,7 +210,7 @@ namespace Clinica_Api.Controllers
             return Ok(informacionpaciente);
         }
 
-
+               
 
         private static byte[] HexStringToByteArray(string hex)
         {

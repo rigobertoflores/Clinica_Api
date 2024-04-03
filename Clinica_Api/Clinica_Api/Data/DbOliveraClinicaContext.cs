@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Clinica_Api.Modelss;
 using Microsoft.EntityFrameworkCore;
 
-namespace Clinica_Api.Data;
+namespace Clinica_Api.Modelss;
 
 public partial class DbOliveraClinicaContext : DbContext
 {
@@ -40,12 +39,15 @@ public partial class DbOliveraClinicaContext : DbContext
 
     public virtual DbSet<PacientesInformacionGeneral> PacientesInformacionGenerals { get; set; }
 
+    public virtual DbSet<PacientesInformacionGeneral1> PacientesInformacionGenerals1 { get; set; }
 
     public virtual DbSet<Receta> Recetas { get; set; }
 
     public virtual DbSet<RecetasX> RecetasXes { get; set; }
 
     public virtual DbSet<RecetasxPaciente> RecetasxPacientes { get; set; }
+
+    public virtual DbSet<TratamientosEnfermedade> TratamientosEnfermedades { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
@@ -295,6 +297,17 @@ public partial class DbOliveraClinicaContext : DbContext
             entity.Property(e => e.Tumores).HasMaxLength(500);
         });
 
+        modelBuilder.Entity<PacientesInformacionGeneral1>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToTable("PacientesInformacionGeneral");
+
+            entity.Property(e => e.Fecha)
+                .HasColumnType("date")
+                .HasColumnName("fecha");
+        });
+
         modelBuilder.Entity<Receta>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_LasRecetas_LasRecetas");
@@ -322,6 +335,15 @@ public partial class DbOliveraClinicaContext : DbContext
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Fecha).HasColumnType("datetime");
+        });
+
+        modelBuilder.Entity<TratamientosEnfermedade>(entity =>
+        {
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Nombre)
+                .HasMaxLength(300)
+                .IsUnicode(false);
+            entity.Property(e => e.PalabrasClaves).HasMaxLength(250);
         });
 
         OnModelCreatingPartial(modelBuilder);
