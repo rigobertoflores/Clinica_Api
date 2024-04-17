@@ -47,6 +47,11 @@ public partial class DbOliveraClinicaContext : DbContext
 
     public virtual DbSet<RecetasxPaciente> RecetasxPacientes { get; set; }
 
+    public virtual DbSet<InformeExpediente> InformeExpedientes { get; set; }
+
+    public virtual DbSet<InformeOperatorio> InformeOperatorios { get; set; }
+
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=master;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False;Database=db_olivera_clinica;Trusted_Connection=True;");
@@ -327,6 +332,23 @@ public partial class DbOliveraClinicaContext : DbContext
             entity.ToTable("RecetasxPaciente");
             entity.Property(e => e.Fecha).HasMaxLength(50);
             entity.Property(e => e.Id).ValueGeneratedOnAdd();
+        });
+
+        modelBuilder.Entity<InformeExpediente>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.ToTable("Informe_Expediente");
+            entity.Property(e => e.InformeId).HasMaxLength(9);
+        });
+
+        modelBuilder.Entity<InformeOperatorio>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.ToTable("Informe_Operatorio");
+            entity.Property(e => e.Informe).IsUnicode(false);
+            entity.Property(e => e.Nombre).IsUnicode(false);
         });
 
         OnModelCreatingPartial(modelBuilder);
