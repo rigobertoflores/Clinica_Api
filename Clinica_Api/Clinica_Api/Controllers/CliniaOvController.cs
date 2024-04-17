@@ -1,4 +1,3 @@
-using Clinica_Api.Data;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using static System.Net.Mime.MediaTypeNames;
@@ -381,7 +380,7 @@ namespace Clinica_Api.Controllers
                     _context.Add(expediente);
 
                 _context.SaveChanges();
-                expedienteresult = _context.Expedientes.FirstOrDefault();
+                expedienteresult = getAllExpediente(expediente.Clave);
             }
             catch (Exception ex)
             {

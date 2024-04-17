@@ -1,5 +1,5 @@
 ﻿using Clinica_Api.ClassModels;
-using Clinica_Api.Data;
+using Clinica_Api.Modelss;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.AccessControl;
 using System.Text.Json;

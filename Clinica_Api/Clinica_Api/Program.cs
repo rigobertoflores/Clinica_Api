@@ -1,4 +1,3 @@
-using Clinica_Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web.UI;
 using Microsoft.Identity.Web;
