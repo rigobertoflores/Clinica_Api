@@ -492,7 +492,7 @@ namespace Clinica_Api.Controllers
                     _context.Add(notas);
 
                 _context.SaveChanges();
-                notasxpaciente = getAllNotasPaciente(notas.Clave);
+                notasxpaciente = getAllNotasPaciente((int)notas.Clave);
             }
             catch (Exception ex)
             {
@@ -518,7 +518,7 @@ namespace Clinica_Api.Controllers
                     _context.Remove(nota);
 
                 _context.SaveChanges();
-                notasxpaciente = getAllNotasPaciente(nota.Clave);
+                notasxpaciente = getAllNotasPaciente((int)nota.Clave);
             }
             catch (Exception ex)
             {
@@ -544,6 +544,143 @@ namespace Clinica_Api.Controllers
             }
 
             return Ok(notas);
+        }
+
+        [HttpGet("CliniaOvController/GetAllInformeo")]
+        public IActionResult GetAllInformeo()
+        {
+            List<InformeOperatorio> historias = new List<InformeOperatorio>();
+            try
+            {
+                historias = _context.InformeOperatorios.ToList();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "No se pudo guardar la información del paciente. Error: " + ex.Message);
+            }
+            return Ok(historias);
+        }
+
+        [HttpPost("CliniaOvController/PostInformeo")]
+        public IActionResult PostInformeo([FromBody] InformeOperatorio informe)
+        {
+            List<InformeOperatorio> informes = null;
+            if (informe == null)
+            {
+                return NotFound();
+            }
+            // Guarda los cambios en la base de datos.
+            try
+            {
+                if (informe.Id > 0)
+                    _context.Update(informe);
+                else
+                    _context.Add(informe);
+
+                _context.SaveChanges();
+                informes = _context.InformeOperatorios.ToList();
+            }
+            catch (Exception ex)
+            {
+                // Maneja cualquier error que pueda ocurrir durante el guardado.
+                return StatusCode(500, "No se pudo guardar la información del paciente. Error: " + ex.Message);
+            }
+
+            return Ok(informes);
+        }
+
+        [HttpPost("CliniaOvController/PostInformeoDelete")]
+        public IActionResult PostInformeoDelete([FromBody] InformeOperatorio informe)
+        {
+            List<InformeOperatorio> informes = new List<InformeOperatorio>();
+            if (informe == null)
+            {
+                return NotFound();
+            }
+            // Guarda los cambios en la base de datos.
+            try
+            {
+                if (informe.Id > 0)
+                    _context.Remove(informe);
+
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                // Maneja cualquier error que pueda ocurrir durante el guardado.
+                return StatusCode(500, "No se pudo guardar la información del paciente. Error: " + ex.Message);
+            }
+
+            return Ok(informes);
+        }
+
+        [HttpGet("CliniaOvController/GetInforme/{id:int}")]
+        public IActionResult GetInforme(int id)
+        {
+
+            InformeExpediente informeexpediente = new InformeExpediente();
+            try
+            {
+                informeexpediente = getAllInformeExpediente(id);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "No se pudo obtener la información del paciente. Error: " + ex.Message);
+            }
+
+            return Ok(informeexpediente);
+        }
+
+        [HttpPost("CliniaOvController/PostInformeExpediente")]
+        public IActionResult PostInformeExpediente([FromBody] InformeExpediente expediente)
+        {
+            InformeExpediente expedienteresult = null;
+            if (expediente == null)
+            {
+                return NotFound();
+            }
+            // Guarda los cambios en la base de datos.
+            try
+            {
+                if (expediente.Id > 0)
+                    _context.Update(expediente);
+                else
+                    _context.Add(expediente);
+
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                // Maneja cualquier error que pueda ocurrir durante el guardado.
+                return StatusCode(500, "No se pudo guardar la información del paciente. Error: " + ex.Message);
+            }
+
+            return Ok(expediente);
+        }
+
+        [HttpPost("CliniaOvController/PostInformeExpedienteDelete")]
+        public IActionResult PostInformeExpedienteDelete([FromBody] InformeExpediente expediente)
+        {
+            InformeExpediente expedienteresult = null;
+            if (expediente == null)
+            {
+                return NotFound();
+            }
+            // Guarda los cambios en la base de datos.
+            try
+            {
+                if (expediente.Id > 0)
+                    _context.Remove(expediente);
+
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                // Maneja cualquier error que pueda ocurrir durante el guardado.
+                return StatusCode(500, "No se pudo guardar la información del paciente. Error: " + ex.Message);
+            }
+
+            return Ok(expedienteresult);
         }
         private List<Nota> getAllNotasPaciente(int id)
         {
@@ -608,6 +745,22 @@ namespace Clinica_Api.Controllers
             try
             {
                 expediente = _context.Expedientes.Where(x => x.Clave == id).FirstOrDefault();
+
+            }
+            catch (Exception ex)
+            {
+                return expediente;
+            }
+            return expediente;
+
+        }
+
+        private InformeExpediente getAllInformeExpediente(int id)
+        {
+            InformeExpediente expediente = new InformeExpediente();
+            try
+            {
+                expediente = _context.InformeExpedientes.Where(x => x.Clave == id).FirstOrDefault();
 
             }
             catch (Exception ex)

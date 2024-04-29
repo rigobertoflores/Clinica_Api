@@ -46,6 +46,11 @@ public partial class DbOliveraClinicaContext : DbContext
 
     public virtual DbSet<RecetasxPaciente> RecetasxPacientes { get; set; }
 
+    public virtual DbSet<InformeExpediente> InformeExpedientes { get; set; }
+
+    public virtual DbSet<InformeOperatorio> InformeOperatorios { get; set; }
+
+
     public virtual DbSet<TratamientosEnfermedade> TratamientosEnfermedades { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -339,6 +344,23 @@ public partial class DbOliveraClinicaContext : DbContext
             entity.ToTable("RecetasxPaciente");
             entity.Property(e => e.Fecha).HasMaxLength(50);
             entity.Property(e => e.Id).ValueGeneratedOnAdd();
+        });
+
+        modelBuilder.Entity<InformeExpediente>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.ToTable("Informe_Expediente");
+            entity.Property(e => e.InformeId).HasMaxLength(9);
+        });
+
+        modelBuilder.Entity<InformeOperatorio>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.ToTable("Informe_Operatorio");
+            entity.Property(e => e.Informe).IsUnicode(false);
+            entity.Property(e => e.Nombre).IsUnicode(false);
         });
 
         modelBuilder.Entity<TratamientosEnfermedade>(entity =>
