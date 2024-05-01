@@ -13,8 +13,8 @@ env:
   AZURE_APIM_APPSERVICEURL: https://clinicaolivera.azurewebsites.net
   SWASHBUCLE_ASPNET_CORE_CLI_PACKAGE_VERSION: 5.6.3
   SWASHBUCKLE_DOTNET_CORE_VERSION: 3.1.x
-  API_IMPORT_SPECIFICATION_PATH: Clinica_Api\publish\swagger.json
-  API_IMPORT_DLL: Clinica_Api\bin\Release\net6.0\Clinica_Api.dll
+  API_IMPORT_SPECIFICATION_PATH: Clinica_Api\Clinica_Api\publish\swagger.json
+  API_IMPORT_DLL: Clinica_Api\Clinica_Api\bin\Release\net6.0\Clinica_Api.dll
   API_IMPORT_VERSION: v1
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 6.0.x
@@ -45,6 +45,7 @@ jobs:
       working-directory: ${{ env.WORKING_DIRECTORY }}
     - name: Generate Open API Specification Document
       run: swagger tofile --output "${{ env.API_IMPORT_SPECIFICATION_PATH }}" "${{ env.API_IMPORT_DLL }}" "${{ env.API_IMPORT_VERSION }}"
+   
     - name: Publish Artifacts
       uses: actions/upload-artifact@v1.0.0
       with:
@@ -65,10 +66,10 @@ jobs:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
         publish-profile: ${{ secrets.ClinicaOlivera_5EEF }}
-    - name: Azure Login
+    - name: Login to Azure
       uses: azure/login@v1
       with:
-        creds: ${{ secrets.ClinicaApiapi_SPN }}
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
     - name: Import API into Azure API Management
       run: az apim api import --path "${{ env.AZURE_APIM_RESOURCE_PATH }}" --resource-group "${{ env.AZURE_APIM_RESOURCEGROUP }}" --service-name "${{ env.AZURE_APIM_SERVICENAME }}" --api-id "${{ env.AZURE_APIM_API_ID }}" --service-url "${{ env.AZURE_APIM_APPSERVICEURL }}" --specification-path "${{ env.API_IMPORT_SPECIFICATION_PATH }}" --specification-format OpenApi --subscription-required false
     - name: logout
