@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
-        builder => builder.WithOrigins("http://localhost:4200", "https://orange-plant-003aa8810.5.azurestaticapps.net", "https://brave-glacier-08b0feb10.5.azurestaticapps.net/") // Cambia esto por la URL de tu aplicación Angular si es diferente
+        builder => builder.WithOrigins("http://localhost:4200", "https://white-rock-00c5c0110.5.azurestaticapps.net") // Cambia esto por la URL de tu aplicación Angular si es diferente
                             .AllowAnyHeader()
                             .AllowAnyMethod());
 });
