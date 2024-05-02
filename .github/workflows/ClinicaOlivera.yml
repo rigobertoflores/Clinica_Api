@@ -13,6 +13,7 @@ env:
   AZURE_APIM_APPSERVICEURL: https://clinicaolivera.azurewebsites.net
   SWASHBUCLE_ASPNET_CORE_CLI_PACKAGE_VERSION: 6.5.0
   SWASHBUCKLE_DOTNET_CORE_VERSION: 3.1.x
+  API_IMPORT_SPECIFICATION_PATHS: Clinica_Api\Clinica_Api\Clinica_Api\publish\swagger.json
   API_IMPORT_SPECIFICATION_PATH: Clinica_Api\Clinica_Api\publish\swagger.json
   API_IMPORT_DLL: Clinica_Api\Clinica_Api\bin\Release\net6.0\Clinica_Api.dll
   API_IMPORT_VERSION: v1
@@ -43,7 +44,7 @@ jobs:
 
     - name: Create Directory for Swagger Output
       run: |
-        $path = ${{ env.API_IMPORT_SPECIFICATION_PATH }}
+        $path = ${{ env.API_IMPORT_SPECIFICATION_PATHS }}
         $dir = [System.IO.Path]::GetDirectoryName($path)
         New-Item -ItemType Directory -Force -Path $dir
       shell: pwsh
