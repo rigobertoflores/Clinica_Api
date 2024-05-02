@@ -11,13 +11,13 @@ env:
   AZURE_APIM_SERVICENAME: ClinicaApiapi
   AZURE_APIM_API_ID: ClinicaApi
   AZURE_APIM_APPSERVICEURL: https://clinicaolivera.azurewebsites.net
-  SWASHBUCLE_ASPNET_CORE_CLI_PACKAGE_VERSION: 6.0.29
+  SWASHBUCLE_ASPNET_CORE_CLI_PACKAGE_VERSION: 6.5.0
   SWASHBUCKLE_DOTNET_CORE_VERSION: 3.1.x
   API_IMPORT_SPECIFICATION_PATH: Clinica_Api\Clinica_Api\publish\swagger.json
   API_IMPORT_DLL: Clinica_Api\Clinica_Api\bin\Release\net6.0\Clinica_Api.dll
   API_IMPORT_VERSION: v1
   CONFIGURATION: Release
-  DOTNET_CORE_VERSION: 6.0.29
+  DOTNET_CORE_VERSION: 6.0.x
   WORKING_DIRECTORY: Clinica_Api
 jobs:
   build:
@@ -36,12 +36,13 @@ jobs:
       run: dotnet test ${{ env.WORKING_DIRECTORY }} --no-build
     - name: Publish
       run: dotnet publish ${{ env.WORKING_DIRECTORY }} --configuration ${{ env.CONFIGURATION }} --no-build --output ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+      
     - name: Install Swashbuckle CLI .NET Global Tool
       run: dotnet tool install --global Swashbuckle.AspNetCore.Cli --version ${{ env.SWASHBUCLE_ASPNET_CORE_CLI_PACKAGE_VERSION }}
+      working-directory: ${{ env.WORKING_DIRECTORY }}
 
     - name: Generate Open API Specification Document
       run: swagger tofile --output ${{ env.API_IMPORT_SPECIFICATION_PATH }} ${{ env.API_IMPORT_DLL }} "${{ env.API_IMPORT_VERSION }}"
-
    
     - name: Publish Artifacts
       uses: actions/upload-artifact@v1.0.0
