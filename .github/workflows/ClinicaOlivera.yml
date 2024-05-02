@@ -42,10 +42,15 @@ jobs:
       working-directory: ${{ env.WORKING_DIRECTORY }}
 
     - name: Create Directory for Swagger Output
-      run: mkdir -p ${{ env.API_IMPORT_SPECIFICATION_PATH | split('/') | first }} 
-    
+      run: |
+        $path = ${{ env.API_IMPORT_SPECIFICATION_PATH }}
+        $dir = [System.IO.Path]::GetDirectoryName($path)
+        New-Item -ItemType Directory -Force -Path $dir
+      shell: pwsh
+
     - name: Generate Open API Specification Document
       run: swagger tofile --output ${{ env.API_IMPORT_SPECIFICATION_PATH }} ${{ env.API_IMPORT_DLL }} "${{ env.API_IMPORT_VERSION }}"
+      shell: pwsh
    
     - name: Publish Artifacts
       uses: actions/upload-artifact@v1.0.0
