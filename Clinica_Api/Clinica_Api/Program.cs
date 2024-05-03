@@ -40,12 +40,11 @@ builder.Services.AddRazorPages().AddMicrosoftIdentityUI();
 var app = builder.Build();
 app.UseCors("AllowSpecificOrigin");
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API v1"));
-}
+
 
 app.UseHttpsRedirection();
 
