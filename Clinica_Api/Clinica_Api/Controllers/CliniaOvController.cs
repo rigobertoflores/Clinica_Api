@@ -86,7 +86,7 @@ namespace Clinica_Api.Controllers
             }
             catch (Exception ex)
             {
-                return blobData;
+                return Ok(blobData);
             }
           
         }
