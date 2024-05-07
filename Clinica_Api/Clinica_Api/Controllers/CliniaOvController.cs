@@ -78,15 +78,15 @@ namespace Clinica_Api.Controllers
         [HttpGet("CliniaOvController/GetFotoPaciente/{id:int}")]
         public IActionResult GetFotoPaciente(int id)
         {
+            Foto blobData= new Foto();
             try
             {
-                Foto blobData = _context.Fotos.Where(x=>x.Id==id).FirstOrDefault();
+                 blobData = _context.Fotos.Where(x=>x.Id==id).FirstOrDefault();
                 return Ok(blobData);
             }
             catch (Exception ex)
             {
-                // Maneja cualquier error que pueda ocurrir durante el guardado.
-                return StatusCode(500, "No se pudo guardar la información del paciente. Error: " + ex.Message);
+                return blobData;
             }
           
         }
