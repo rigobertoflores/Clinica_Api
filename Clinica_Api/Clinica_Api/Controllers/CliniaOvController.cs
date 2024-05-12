@@ -65,7 +65,31 @@ namespace Clinica_Api.Controllers
                 // Maneja cualquier error que pueda ocurrir durante el guardado.
                 return StatusCode(500, "No se pudo guardar la información del paciente. Error: " + ex.Message);
             }
+        } 
+        
+        [HttpGet("CliniaOvController/GetPacientesNotificacionesCitas")]
+        public IActionResult GetPacientesConCitas()
+        {
+            try
+            {
+              
+                var pacientes = _context.PacientesInformacionGenerals;
+                var pacientesActivos = pacientes.Where(p => p.FechaUltimaConsulta != null && Convert.ToDateTime(p.FechaUltimaConsulta).Year < DateTime.Now.Year - 3);
+                var pacientesInactivos = pacientes.Where(p => p.FechaUltimaConsulta != null && Convert.ToDateTime(p.FechaUltimaConsulta).Year < DateTime.Now.Year - 3);
+                var  infoNotificacionPacActivos = pacientesActivos.Select(p => new {p.Email,p.FechaConsulta, p.Nombre }).ToList();
+                var  infoNotificacionPacInactivos = pacientesInactivos.Select(p => new { p.Email, p.FechaConsulta, p.Nombre }).ToList();
+                var infoPacientesCitas = pacientes.Where(p => p.FechaUltimaConsulta != null && Convert.ToDateTime(p.FechaUltimaConsulta).Year < DateTime.Now.Year - 3);
+                //var infoNotificacionPacientes =
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                // Maneja cualquier error que pueda ocurrir durante el guardado.
+                return StatusCode(500, "No se pudo guardar la información del paciente. Error: " + ex.Message);
+            }
         }
+
+
 
         [HttpGet("CliniaOvController/GetPacienteId/{id:int}")]
         public IActionResult GetPacienteId(int id)
