@@ -202,7 +202,7 @@ public partial class DbOliveraClinicaContext : DbContext
 
         modelBuilder.Entity<Imagene>(entity =>
         {
-            entity.HasKey(e => e.Id);
+            entity.HasKey(e => e.Id).HasName("PK_Imagenes_Id");
             entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
             entity.Property(e => e.Id).HasColumnName("ID");
