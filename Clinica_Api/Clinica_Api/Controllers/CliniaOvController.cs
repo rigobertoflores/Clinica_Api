@@ -7,6 +7,9 @@ using Image = System.Drawing.Image;
 using Clinica_Api.Modelss;
 using System.Collections.Generic;
 using Microsoft.Win32;
+using DinkToPdf;
+using DinkToPdf.Contracts;
+using System.Globalization;
 
 namespace Clinica_Api.Controllers
 {
@@ -15,9 +18,12 @@ namespace Clinica_Api.Controllers
     public class CliniaOvController : ControllerBase
     {
         private readonly DbOliveraClinicaContext _context;
-        public CliniaOvController(DbOliveraClinicaContext context)
+        private readonly IConverter _converter;
+
+        public CliniaOvController(DbOliveraClinicaContext context, IConverter converter)
         {
             _context = context;
+            _converter = converter;
         }
 
         [HttpGet("CliniaOvController/MostrarTexto")]
@@ -687,7 +693,7 @@ namespace Clinica_Api.Controllers
             List<Nota> notasxpaciente = new List<Nota>();
             try
             {
-                notasxpaciente = _context.Notas.Where(x => x.Clave == id).OrderByDescending(x => x.Fecha).ToList();
+                notasxpaciente = _context.Notas.Where(x => x.Clave == id).AsEnumerable().OrderByDescending(x => DateTime.ParseExact(x.Fecha, "dd/MM/yyyy", CultureInfo.InvariantCulture)).ToList();
 
             }
             catch (Exception ex)
@@ -701,7 +707,7 @@ namespace Clinica_Api.Controllers
             List<RecetasxPaciente> recetasxpaciente = new List<RecetasxPaciente>();
             try 
             {
-                recetasxpaciente = _context.RecetasxPacientes.Where(x => x.Clave == id).OrderByDescending(x=>x.Fecha).ToList();
+                recetasxpaciente = _context.RecetasxPacientes.Where(x => x.Clave == id).AsEnumerable().OrderByDescending(x => DateTime.ParseExact(x.Fecha, "dd/MM/yyyy", CultureInfo.InvariantCulture)).ToList();
 
             }
             catch (Exception ex)
@@ -768,7 +774,50 @@ namespace Clinica_Api.Controllers
                 return expediente;
             }
             return expediente;
+        }
 
+        [HttpPost("CliniaOvController/Print")]
+        public IActionResult PrintDocument([FromBody] PrintText print)
+        {
+            byte[] pdf = new byte[1];
+            try
+            {
+               PechkinPaperSize custompage = new PechkinPaperSize("210mm", "135mm");
+
+
+                var doc = new HtmlToPdfDocument()
+                {
+                    GlobalSettings = {
+                     PaperSize = custompage,
+                     Margins = new MarginSettings { Top = 30, Bottom = 20, Left = 20, Right = 20 }, // Ajusta el margen superior para acomodar el encabezado
+                     DocumentTitle = "PDF Report",
+                },
+                    Objects = {
+                 new ObjectSettings
+                {
+                 HtmlContent = print.text,
+            WebSettings = { DefaultEncoding = "utf-8" },
+            HeaderSettings = new HeaderSettings
+            {
+                FontSize = 12,
+                Center = "Información central iuhihuih hihu \n hih hihuihiu hiuhuih huih", // Texto centrado con una nueva línea
+                Spacing = 10,
+            }
+                }
+               }
+                };
+
+                pdf = _converter.Convert(doc);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+            }
+
+            // Devuelve el archivo PDF como un archivo descargable
+            return Ok(File(pdf, "application/pdf", "downloaded_file.pdf"));
+            
         }
         private static byte[] HexStringToByteArray(string hex)
         {
