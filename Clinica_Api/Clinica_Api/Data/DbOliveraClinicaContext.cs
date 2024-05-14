@@ -52,6 +52,7 @@ public partial class DbOliveraClinicaContext : DbContext
 
 
     public virtual DbSet<TratamientosEnfermedade> TratamientosEnfermedades { get; set; }
+    public virtual DbSet<Plantillas> Plantillas { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
@@ -370,6 +371,22 @@ public partial class DbOliveraClinicaContext : DbContext
                 .HasMaxLength(300)
                 .IsUnicode(false);
             entity.Property(e => e.PalabrasClaves).HasMaxLength(250);
+        });
+
+        modelBuilder.Entity<Plantillas>(entity =>
+        {
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Nombre)
+                .IsRequired() // Indica que el campo no puede ser nulo
+                .HasMaxLength(250); // Ajusta según si necesitas soporte Unicode o no
+            entity.Property(e => e.Asunto)
+                .HasMaxLength(450); // Especifica la longitud máxima, deja el Unicode predeterminado si necesario
+            entity.Property(e => e.CuerpoEmail); // Especifica el tipo de dato si es necesario
+            entity.Property(e => e.FechaEnvio)
+                .IsRequired(); // Asegura que el tipo de dato coincide con la base de datos
+            entity.Property(e => e.Adjunto)
+                .IsRequired() // Indica que el campo no puede ser nulo
+                .HasMaxLength(50); // Especifica la longitud máxima
         });
 
         OnModelCreatingPartial(modelBuilder);
