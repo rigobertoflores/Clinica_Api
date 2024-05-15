@@ -10,6 +10,7 @@ using Microsoft.Win32;
 using DinkToPdf;
 using DinkToPdf.Contracts;
 using System.Globalization;
+using System.Collections;
 
 namespace Clinica_Api.Controllers
 {
@@ -640,7 +641,6 @@ namespace Clinica_Api.Controllers
         [HttpPost("CliniaOvController/PostInformeExpediente")]
         public IActionResult PostInformeExpediente([FromBody] InformeExpediente expediente)
         {
-            InformeExpediente expedienteresult = null;
             if (expediente == null)
             {
                 return NotFound();
@@ -780,17 +780,25 @@ namespace Clinica_Api.Controllers
         public IActionResult PrintDocument([FromBody] PrintText print)
         {
             byte[] pdf = new byte[1];
+            
             try
             {
-               PechkinPaperSize custompage = new PechkinPaperSize("210mm", "135mm");
+                ConfiguracionPrint lista = new ConfiguracionPrint();
+                lista = _context.ConfiguracionPrints.Where(x=>x.Usuario==print.user).FirstOrDefault();
+                if(lista==null)
+                {
+                    lista= new ConfiguracionPrint() { Largo= 135,Ancho= 210, MargenArriba = 30, MargenAbajo = 20, MargenIzquierdo = 20, MargenDerecho = 20, Espacio=10, Encabezado=" " };
+                }
+                
+                PechkinPaperSize custompage = new PechkinPaperSize(lista.Ancho.ToString()+"mm", lista.Largo.ToString() + "mm");
 
 
                 var doc = new HtmlToPdfDocument()
                 {
                     GlobalSettings = {
                      PaperSize = custompage,
-                     Margins = new MarginSettings { Top = 30, Bottom = 20, Left = 20, Right = 20 }, // Ajusta el margen superior para acomodar el encabezado
-                     DocumentTitle = "PDF Report",
+                     Margins = new MarginSettings { Top = (double?)lista.MargenArriba, Bottom = (double?)lista.MargenAbajo, Left = (double?)lista.MargenIzquierdo, Right = (double?)lista.MargenDerecho },
+                     DocumentTitle = "Receta",
                 },
                     Objects = {
                  new ObjectSettings
@@ -800,8 +808,8 @@ namespace Clinica_Api.Controllers
             HeaderSettings = new HeaderSettings
             {
                 FontSize = 12,
-                Center = "Información central iuhihuih hihu \n hih hihuihiu hiuhuih huih", // Texto centrado con una nueva línea
-                Spacing = 10,
+                Center = lista.Encabezado ,
+                Spacing = (double?)lista.Espacio,
             }
                 }
                }
@@ -818,6 +826,52 @@ namespace Clinica_Api.Controllers
             // Devuelve el archivo PDF como un archivo descargable
             return Ok(File(pdf, "application/pdf", "downloaded_file.pdf"));
             
+        }
+
+
+
+        [HttpPost("CliniaOvController/PostConfiguraImprimir")]
+        public IActionResult ConfiguraImprimir([FromBody] ConfiguracionPrint print)
+        {
+            List<ConfiguracionPrint> lista = new List<ConfiguracionPrint>();
+            if (print == null)
+            {
+                return NotFound();
+            }
+            try
+            {
+                if (print.Id > 0)
+                    _context.Update(print);
+                else
+                    _context.Add(print);
+
+                _context.SaveChanges();
+                lista = _context.ConfiguracionPrints.ToList();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "No se pudo guardar la información del paciente. Error: " + ex.Message);
+            }
+
+            return Ok(lista);
+
+        }
+
+        [HttpGet("CliniaOvController/ListaImpresionUsuario")]
+        public IActionResult ListaImpresionUsuario()
+        {
+            List< ConfiguracionPrint> lista = new List<ConfiguracionPrint>();
+            try
+            {
+              lista=   _context.ConfiguracionPrints.ToList();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "No se pudo obtener la informacion. Error: " + ex.Message);
+            }
+
+            return Ok(lista);
+
         }
         private static byte[] HexStringToByteArray(string hex)
         {

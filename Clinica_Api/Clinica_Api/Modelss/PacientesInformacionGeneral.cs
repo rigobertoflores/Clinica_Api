@@ -7,7 +7,7 @@ public partial class PacientesInformacionGeneral
 {
     public int Id { get; set; }
 
-    public int? Clave { get; set; }
+    public int Clave { get; set; }
 
     public string? FechaDeNacimiento { get; set; }
 
