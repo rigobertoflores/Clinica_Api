@@ -731,6 +731,21 @@ namespace Clinica_Api.Controllers
             return blobData;
 
         }
+
+        private List<Complementario> getAllDocumento(int id)
+        {
+            List<Complementario> blobData = new List<Complementario>();
+            try
+            {
+                blobData = _context.Complementarios.Where(x => x.Clave == id).ToList();
+            }
+            catch (Exception ex)
+            {
+                return blobData;
+            }
+            return blobData;
+
+        }
         private Foto getImagePerfil(int id)
         {
             Foto blobData = new Foto();
@@ -828,8 +843,6 @@ namespace Clinica_Api.Controllers
             
         }
 
-
-
         [HttpPost("CliniaOvController/PostConfiguraImprimir")]
         public IActionResult ConfiguraImprimir([FromBody] ConfiguracionPrint print)
         {
@@ -858,6 +871,50 @@ namespace Clinica_Api.Controllers
         }
 
         [HttpGet("CliniaOvController/ListaImpresionUsuario")]
+
+        [HttpGet("CliniaOvController/GetImagenesPaciente/{id:int}")]
+        public IActionResult GetPdfPaciente(int id)
+        {
+            List<Imagene> blobData = getAllImage(id);
+
+            return Ok(blobData);
+        }
+
+        [HttpPost("CliniaOvController/PostPdf")]
+        public async Task<IActionResult> PostPdf(IFormFile documento, [FromForm] string id)
+        {
+            List<Complementario> blobData = new List<Complementario>();
+            try
+            {
+                if (documento == null || documento.Length == 0)
+                    return BadRequest("Archivo no enviado");
+
+                var extension = Path.GetExtension(documento.FileName);
+
+                using (var memoryStream = new MemoryStream())
+                {
+                    await documento.CopyToAsync(memoryStream);
+
+                    var img = new Imagene
+                    {
+                        BlobData = memoryStream.ToArray(),
+                        Letra = "",
+                        Ext = extension,
+                        Clave = int.Parse(id),
+                    };
+
+                    _context.Imagenes.Add(img);
+                    await _context.SaveChangesAsync();
+                    blobData = getAllDocumento(int.Parse(id));
+                    return Ok(blobData);
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         public IActionResult ListaImpresionUsuario()
         {
             List< ConfiguracionPrint> lista = new List<ConfiguracionPrint>();

@@ -37,6 +37,7 @@ public partial class DbOliveraClinicaContext : DbContext
     public virtual DbSet<Historia> Historias { get; set; }
 
     public virtual DbSet<Imagene> Imagenes { get; set; }
+    public virtual DbSet<Complementario> Complementarios { get; set; }
 
     public virtual DbSet<InformeExpediente> InformeExpedientes { get; set; }
 
@@ -66,7 +67,7 @@ public partial class DbOliveraClinicaContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=LAPTOP-UB7952GK\\MSSQLSERVER01;Integrated Security=True;Connect Timeout=300;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Database=db_olivera_clinica;Trusted_Connection=True;");
+        => optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=master;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False;Database=db_olivera_clinica;Trusted_Connection=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -251,6 +252,18 @@ public partial class DbOliveraClinicaContext : DbContext
                 .IsUnicode(false);
             entity.Property(e => e.Letra)
                 .HasMaxLength(40)
+                .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<Complementario>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_Complementarios");
+
+            entity.Property(e => e.Ext)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Nombre)
+                .HasMaxLength(50)
                 .IsUnicode(false);
         });
 
