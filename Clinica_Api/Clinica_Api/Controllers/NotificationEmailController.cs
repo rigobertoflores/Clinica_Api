@@ -1,6 +1,7 @@
 ﻿using Clinica_Api.Modelss;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Numerics;
 
 namespace Clinica_Api.Controllers
 {
@@ -33,10 +34,9 @@ namespace Clinica_Api.Controllers
 
 
 
-        [HttpPost("NotificationEmailController/PostInsertPlantillas")]
+        [HttpPost("NotificationEmailController/PostPlantillas")]
         public IActionResult PostPlantillas([FromBody] Plantillas plantilla)
         {
-            Plantillas plan = null;
             try
             {
                 var context = _context.Plantillas;
@@ -45,17 +45,10 @@ namespace Clinica_Api.Controllers
                 {
                     return NotFound();
                 }
-                plan = new Plantillas()
-                {
-                    Id = 0,
-                    Nombre = plantilla.Nombre,
-                    Asunto = plantilla.Asunto,
-                    CuerpoEmail = plantilla.CuerpoEmail,
-                    FechaEnvio = plantilla.FechaEnvio,
-                    Adjunto = plantilla.Adjunto
-
-                };
-                _context.Plantillas.Add(plan);
+                if (plantilla.Id == 0)
+                    _context.Plantillas.Add(plantilla);
+                else
+                    _context.Plantillas.Update(plantilla);
                 _context.SaveChanges();
 
             }
@@ -65,32 +58,32 @@ namespace Clinica_Api.Controllers
                 return StatusCode(500, "No se pudo guardar la información del paciente. Error: " + ex.Message);
             }
 
-            return Ok(plan);
+            return Ok(plantilla);
         }
 
 
-        //[HttpPost("NotificationEmailController/EditTratamiento/{id:int}")]
+        //[HttpPost("NotificationEmailController/EditPlantilla")]
 
-        //public IActionResult Edit(int id, [FromBody] TratamientosEnfermedade tratamientosEnfermedades)
+        //public IActionResult Edit([FromBody] Plantillas plantilla)
         //{
-        //    TratamientosEnfermedade tratamiento = null;
+        //    Plantillas plantillaModificada = null;
         //    try
         //    {
-        //        var context = _context.TratamientosEnfermedades;
+        //        var context = _context.Plantillas.ToList();
 
         //        if (context == null || !ModelState.IsValid)
         //        {
         //            return NotFound();
         //        }
-        //        tratamiento = new TratamientosEnfermedade()
+        //        plantillaModificada = new Plantillas()
         //        {
-        //            Id = id,
-        //            Nombre = tratamientosEnfermedades.Nombre,
-        //            DescripcionEnfermedad = tratamientosEnfermedades.DescripcionEnfermedad,
-        //            Tratamiento = tratamientosEnfermedades.Tratamiento,
-        //            PalabrasClaves = tratamientosEnfermedades.PalabrasClaves,
+        //            Nombre = plantilla.Nombre,
+        //            Asunto = plantilla.Asunto,
+        //            CuerpoEmail = plantilla.CuerpoEmail,
+        //            FechaEnvio = plantilla.FechaEnvio,
+        //            Adjunto = ""
         //        };
-        //        _context.TratamientosEnfermedades.Update(tratamiento);
+        //        _context.Plantillas.Update(plantillaModificada);
         //        _context.SaveChanges();
 
         //    }
@@ -100,7 +93,9 @@ namespace Clinica_Api.Controllers
         //        return StatusCode(500, "No se pudo guardar la información del paciente. Error: " + ex.Message);
         //    }
 
-        //    return Ok(tratamiento);
+        //    return Ok(plantillaModificada);
+        //}
+
 
         [HttpDelete("NotificationEmailController/DeletePlantilla/{id:int}")]
         public IActionResult Delete(int id)

@@ -375,7 +375,8 @@ public partial class DbOliveraClinicaContext : DbContext
 
         modelBuilder.Entity<Plantillas>(entity =>
         {
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.HasKey(e => e.Id).HasName("PK_Plantillas");
+            entity.Property(e => e.Id).HasColumnName("id") ;
             entity.Property(e => e.Nombre)
                 .IsRequired() // Indica que el campo no puede ser nulo
                 .HasMaxLength(250); // Ajusta según si necesitas soporte Unicode o no
