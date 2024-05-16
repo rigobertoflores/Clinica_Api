@@ -1,3 +1,24 @@
 Scaffold-DbContext "Data Source=LAPTOP-UB7952GK\MSSQLSERVER01;Integrated Security=True;Connect Timeout=300;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Database=db_olivera_clinica;Trusted_Connection=True;" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Modelss -Force
 
  Scaffold-DbContext "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=master;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False;Database=db_olivera_clinica;Trusted_Connection=True;" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Modelss -Force
+
+
+ USE [db_olivera_clinica]
+GO
+/****** Object:  Table [dbo].[Complementarios]    Script Date: 5/16/2024 2:38:09 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Complementarios](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [varchar](50) NULL,
+	[BlobData] [varbinary](max) NULL,
+	[Ext] [varchar](50) NULL,
+	[Clave] [int] NULL,
+ CONSTRAINT [PK_Complementarios] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
