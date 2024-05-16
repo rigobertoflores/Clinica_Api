@@ -870,9 +870,7 @@ namespace Clinica_Api.Controllers
 
         }
 
-        [HttpGet("CliniaOvController/ListaImpresionUsuario")]
-
-        [HttpGet("CliniaOvController/GetImagenesPaciente/{id:int}")]
+        [HttpGet("CliniaOvController/GetPdfPaciente/{id:int}")]
         public IActionResult GetPdfPaciente(int id)
         {
             List<Imagene> blobData = getAllImage(id);
@@ -915,6 +913,8 @@ namespace Clinica_Api.Controllers
             }
         }
 
+
+        [HttpGet("CliniaOvController/ListaImpresionUsuario")]
         public IActionResult ListaImpresionUsuario()
         {
             List< ConfiguracionPrint> lista = new List<ConfiguracionPrint>();
