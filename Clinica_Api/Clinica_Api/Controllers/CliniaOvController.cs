@@ -893,15 +893,15 @@ namespace Clinica_Api.Controllers
                 {
                     await documento.CopyToAsync(memoryStream);
 
-                    var img = new Imagene
+                    var img = new Complementario
                     {
                         BlobData = memoryStream.ToArray(),
-                        Letra = "",
+                        Nombre = documento.FileName,
                         Ext = extension,
                         Clave = int.Parse(id),
                     };
 
-                    _context.Imagenes.Add(img);
+                    _context.Complementarios.Add(img);
                     await _context.SaveChangesAsync();
                     blobData = getAllDocumento(int.Parse(id));
                     return Ok(blobData);
@@ -912,7 +912,6 @@ namespace Clinica_Api.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
 
         [HttpGet("CliniaOvController/ListaImpresionUsuario")]
         public IActionResult ListaImpresionUsuario()
@@ -929,6 +928,14 @@ namespace Clinica_Api.Controllers
 
             return Ok(lista);
 
+        }
+
+        [HttpGet("CliniaOvController/GetComplementariosPaciente/{id:int}")]
+        public IActionResult GetComplementariosPaciente(int id)
+        {
+            List<Complementario> blobData = getAllDocumento(id);
+
+            return Ok(blobData);
         }
         private static byte[] HexStringToByteArray(string hex)
         {
