@@ -898,37 +898,50 @@ namespace Clinica_Api.Controllers
                 using (var memoryStream = new MemoryStream())
                 {
                     await documento.CopyToAsync(memoryStream);
-                    memoryStream.Position = 0;
 
-                    using (var images = new MagickImageCollection())
+                    if (extension == ".pdf")
                     {
-                        images.Read(memoryStream, new MagickReadSettings { Density = new Density(300, 300) });
-
-                        int pageCount = 0;
-                        foreach (var pageImage in images)
+                        using (var images = new MagickImageCollection())
                         {
-                            if (pageCount >= 2) break;
+                            memoryStream.Position = 0;
+                            images.Read(memoryStream, new MagickReadSettings { Density = new Density(300, 300) });
 
-                            var pageMemoryStream = new MemoryStream();
-                            pageImage.Format = MagickFormat.Jpg;
-                            pageImage.Write(pageMemoryStream);
-                            pageMemoryStream.Position = 0;
-
-                            var documentosubir = new Complementario
+                            int pageCount = 0;
+                            foreach (var pageImage in images)
                             {
-                                BlobData = pageMemoryStream.ToArray(),
-                                Nombre = documento.FileName, // Set or adjust the 'Letra' field as necessary
-                                Ext = ".jpg", // Change the extension to JPG as we're storing images
-                                Clave = int.Parse(id),
-                            };
+                                if (pageCount >= 2) break;
 
-                            _context.Complementarios.Add(documentosubir);
-                            pageCount++;
+                                var pageMemoryStream = new MemoryStream();
+                                pageImage.Format = MagickFormat.Jpg;
+                                pageImage.Write(pageMemoryStream);
+                                pageMemoryStream.Position = 0;
+
+                                var documentosubir = new Complementario
+                                {
+                                    BlobData = pageMemoryStream.ToArray(),
+                                    Nombre = documento.FileName,
+                                    Ext = ".jpg",
+                                    Clave = int.Parse(id),
+                                };
+                                _context.Complementarios.Add(documentosubir);
+                                pageCount++;
+                            }
                         }
-                        await _context.SaveChangesAsync();
-                        blobData = getAllDocumento(int.Parse(id));
-                        return Ok(blobData);
                     }
+                    else
+                    {
+                        var documentosubir = new Complementario
+                        {
+                            BlobData = memoryStream.ToArray(),
+                            Nombre = documento.FileName,
+                            Ext = ".jpg",
+                            Clave = int.Parse(id),
+                        };
+                        _context.Complementarios.Add(documentosubir);
+                    }
+                    await _context.SaveChangesAsync();
+                    blobData = getAllDocumento(int.Parse(id));
+                    return Ok(blobData);
                 }
             }
             catch (Exception ex)
@@ -954,26 +967,13 @@ namespace Clinica_Api.Controllers
 
         }
 
-        public void ConvertPdfToJpg(string inputPdfPath, string outputDirectory)
+        [HttpGet("CliniaOvController/GetComplementariosPaciente/{id:int}")]
+        public IActionResult GetComplementariosPaciente(int id)
         {
-            using (var document = PdfReader.Open(inputPdfPath, PdfDocumentOpenMode.ReadOnly))
-            {
-                for (int i = 0; i < document.PageCount; i++)
-                {
-                    var page = document.Pages[i];
-                    using (var image = new MagickImage())
-                    {
-                        if (page != null) { 
-                        image.Read(page);
-                        string outputFile = Path.Combine(outputDirectory, $"page_{i}.jpg");
-                        image.Format = MagickFormat.Jpg;
-                        image.Write(outputFile);
-                        }
-                    }
-                }
-            }
-        }
+            List<Complementario> blobData = getAllDocumento(id);
 
+            return Ok(blobData);
+        }
         private static byte[] HexStringToByteArray(string hex)
         {
             int NumberChars = hex.Length;
