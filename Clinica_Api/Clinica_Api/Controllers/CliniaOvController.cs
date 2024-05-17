@@ -11,6 +11,9 @@ using DinkToPdf;
 using DinkToPdf.Contracts;
 using System.Globalization;
 using System.Collections;
+using System.Reflection.PortableExecutable;
+using PdfSharp.Pdf.IO;
+using ImageMagick;
 
 namespace Clinica_Api.Controllers
 {
@@ -32,9 +35,9 @@ namespace Clinica_Api.Controllers
         {
             try
             {
-            var contenido = _context.PacientesInformacionGenerals.Take(10).ToList();
+                var contenido = _context.PacientesInformacionGenerals.Take(10).ToList();
 
-            return Ok(contenido);
+                return Ok(contenido);
             }
             catch (Exception ex)
             {
@@ -48,9 +51,9 @@ namespace Clinica_Api.Controllers
         {
             try
             {
-            var contenido = _context.PacientesInformacionGenerals.OrderByDescending(x => x.FechaConsulta).FirstOrDefault();
+                var contenido = _context.PacientesInformacionGenerals.OrderByDescending(x => x.FechaConsulta).FirstOrDefault();
 
-            return Ok(contenido);
+                return Ok(contenido);
             }
             catch (Exception ex)
             {
@@ -64,8 +67,8 @@ namespace Clinica_Api.Controllers
         {
             try
             {
-                var contenido = _context.PacientesInformacionGenerals.OrderByDescending(x => x.FechaConsulta);         
-            return Ok(contenido);
+                var contenido = _context.PacientesInformacionGenerals.OrderByDescending(x => x.FechaConsulta);
+                return Ok(contenido);
             }
             catch (Exception ex)
             {
@@ -85,17 +88,17 @@ namespace Clinica_Api.Controllers
         [HttpGet("CliniaOvController/GetFotoPaciente/{id:int}")]
         public IActionResult GetFotoPaciente(int id)
         {
-            Foto blobData= new Foto();
+            Foto blobData = new Foto();
             try
             {
-                 blobData = _context.Fotos.Where(x=>x.Id==id).FirstOrDefault();
+                blobData = _context.Fotos.Where(x => x.Id == id).FirstOrDefault();
                 return Ok(blobData);
             }
             catch (Exception ex)
             {
                 return Ok(blobData);
             }
-          
+
         }
 
         [HttpPost("CliniaOvController/PostImagenPerfil")]
@@ -113,11 +116,12 @@ namespace Clinica_Api.Controllers
                 {
                     await image.CopyToAsync(memoryStream);
 
-                    
-                    var imageexist=_context.Fotos.Where(x=>x.Id== int.Parse(id)).FirstOrDefault();
-                    if (imageexist != null) {
-                    imageexist.BlobData = memoryStream.ToArray();
-                    _context.Fotos.Update(imageexist);
+
+                    var imageexist = _context.Fotos.Where(x => x.Id == int.Parse(id)).FirstOrDefault();
+                    if (imageexist != null)
+                    {
+                        imageexist.BlobData = memoryStream.ToArray();
+                        _context.Fotos.Update(imageexist);
                     }
                     else
                     {
@@ -144,7 +148,7 @@ namespace Clinica_Api.Controllers
         [HttpPost("CliniaOvController/PostPaciente")]
         public IActionResult PostPaciente([FromBody] PacientesInformacionGeneral paciente)
         {
-            PacientesInformacionGeneral informacionpaciente =new PacientesInformacionGeneral();
+            PacientesInformacionGeneral informacionpaciente = new PacientesInformacionGeneral();
             try
             {
                 if (paciente.Clave > 0)
@@ -215,9 +219,9 @@ namespace Clinica_Api.Controllers
                 {
 
                     var info = _context.PacientesInformacionGenerals.OrderByDescending(p => p.Clave).FirstOrDefault();
-                    paciente.Clave = info.Clave+1;
+                    paciente.Clave = info.Clave + 1;
                     _context.PacientesInformacionGenerals.Add(paciente);
-                   
+
                 }
                 _context.SaveChanges();
                 informacionpaciente = _context.PacientesInformacionGenerals.FirstOrDefault(x => x.Clave == paciente.Clave);
@@ -242,10 +246,10 @@ namespace Clinica_Api.Controllers
             // Guarda los cambios en la base de datos.
             try
             {
-                if (receta.Id > 0) 
-                _context.Update(receta);
-                else                
-                _context.Add(receta);
+                if (receta.Id > 0)
+                    _context.Update(receta);
+                else
+                    _context.Add(receta);
 
                 _context.SaveChanges();
                 recetasxpaciente = getAllRecetasPaciente((int)receta.Clave);
@@ -271,9 +275,9 @@ namespace Clinica_Api.Controllers
             try
             {
                 if (receta.Id > 0)
-                    _context.Remove(receta);             
+                    _context.Remove(receta);
 
-                    _context.SaveChanges();
+                _context.SaveChanges();
                 recetasxpaciente = getAllRecetasPaciente((int)receta.Clave);
             }
             catch (Exception ex)
@@ -292,7 +296,7 @@ namespace Clinica_Api.Controllers
             List<RecetasxPaciente> recetasxpaciente = new List<RecetasxPaciente>();
             try
             {
-                recetasxpaciente=getAllRecetasPaciente(id);
+                recetasxpaciente = getAllRecetasPaciente(id);
             }
             catch (Exception ex)
             {
@@ -319,7 +323,7 @@ namespace Clinica_Api.Controllers
                     _context.Add(historia);
 
                 _context.SaveChanges();
-                 historias =_context.Historias.ToList();
+                historias = _context.Historias.ToList();
             }
             catch (Exception ex)
             {
@@ -427,7 +431,7 @@ namespace Clinica_Api.Controllers
         public IActionResult GetExpediente(int id)
         {
 
-           Expediente expediente = new Expediente();
+            Expediente expediente = new Expediente();
             try
             {
                 expediente = getAllExpediente(id);
@@ -444,7 +448,7 @@ namespace Clinica_Api.Controllers
         public IActionResult GetImagenesPaciente(int id)
         {
             List<Imagene> blobData = getAllImage(id);
-         
+
             return Ok(blobData);
         }
 
@@ -452,29 +456,30 @@ namespace Clinica_Api.Controllers
         public async Task<IActionResult> PostImagen(IFormFile image, [FromForm] string id)
         {
             List<Imagene> blobData = new List<Imagene>();
-            try { 
-            if (image == null || image.Length == 0)
-                return BadRequest("Archivo no enviado");
-
-            var extension = Path.GetExtension(image.FileName);
-
-            using (var memoryStream = new MemoryStream())
+            try
             {
-                await image.CopyToAsync(memoryStream);
+                if (image == null || image.Length == 0)
+                    return BadRequest("Archivo no enviado");
 
-                var img = new Imagene
+                var extension = Path.GetExtension(image.FileName);
+
+                using (var memoryStream = new MemoryStream())
                 {
-                    BlobData = memoryStream.ToArray(),
-                    Letra = "",
-                    Ext = extension,
-                    Clave=int.Parse(id),
-                };
+                    await image.CopyToAsync(memoryStream);
 
-                _context.Imagenes.Add(img);
-                await _context.SaveChangesAsync();
-                blobData= getAllImage(int.Parse(id));
-                return Ok(blobData);
-            }
+                    var img = new Imagene
+                    {
+                        BlobData = memoryStream.ToArray(),
+                        Letra = "",
+                        Ext = extension,
+                        Clave = int.Parse(id),
+                    };
+
+                    _context.Imagenes.Add(img);
+                    await _context.SaveChangesAsync();
+                    blobData = getAllImage(int.Parse(id));
+                    return Ok(blobData);
+                }
             }
             catch (Exception ex)
             {
@@ -703,26 +708,27 @@ namespace Clinica_Api.Controllers
             return notasxpaciente;
 
         }
-        private List<RecetasxPaciente> getAllRecetasPaciente(int id) {
+        private List<RecetasxPaciente> getAllRecetasPaciente(int id)
+        {
             List<RecetasxPaciente> recetasxpaciente = new List<RecetasxPaciente>();
-            try 
+            try
             {
                 recetasxpaciente = _context.RecetasxPacientes.Where(x => x.Clave == id).AsEnumerable().OrderByDescending(x => DateTime.ParseExact(x.Fecha, "dd/MM/yyyy", CultureInfo.InvariantCulture)).ToList();
 
             }
             catch (Exception ex)
             {
-                return  new List<RecetasxPaciente>();
+                return new List<RecetasxPaciente>();
             }
             return recetasxpaciente;
-        
+
         }
         private List<Imagene> getAllImage(int id)
         {
             List<Imagene> blobData = new List<Imagene>();
             try
             {
-               blobData = _context.Imagenes.Where(x => x.Clave == id).ToList();
+                blobData = _context.Imagenes.Where(x => x.Clave == id).ToList();
             }
             catch (Exception ex)
             {
@@ -795,17 +801,17 @@ namespace Clinica_Api.Controllers
         public IActionResult PrintDocument([FromBody] PrintText print)
         {
             byte[] pdf = new byte[1];
-            
+
             try
             {
                 ConfiguracionPrint lista = new ConfiguracionPrint();
-                lista = _context.ConfiguracionPrints.Where(x=>x.Usuario==print.user).FirstOrDefault();
-                if(lista==null)
+                lista = _context.ConfiguracionPrints.Where(x => x.Usuario == print.user).FirstOrDefault();
+                if (lista == null)
                 {
-                    lista= new ConfiguracionPrint() { Largo= 135,Ancho= 210, MargenArriba = 30, MargenAbajo = 20, MargenIzquierdo = 20, MargenDerecho = 20, Espacio=10, Encabezado=" " };
+                    lista = new ConfiguracionPrint() { Largo = 135, Ancho = 210, MargenArriba = 30, MargenAbajo = 20, MargenIzquierdo = 20, MargenDerecho = 20, Espacio = 10, Encabezado = " " };
                 }
-                
-                PechkinPaperSize custompage = new PechkinPaperSize(lista.Ancho.ToString()+"mm", lista.Largo.ToString() + "mm");
+
+                PechkinPaperSize custompage = new PechkinPaperSize(lista.Ancho.ToString() + "mm", lista.Largo.ToString() + "mm");
 
 
                 var doc = new HtmlToPdfDocument()
@@ -840,7 +846,7 @@ namespace Clinica_Api.Controllers
 
             // Devuelve el archivo PDF como un archivo descargable
             return Ok(File(pdf, "application/pdf", "downloaded_file.pdf"));
-            
+
         }
 
         [HttpPost("CliniaOvController/PostConfiguraImprimir")]
@@ -892,19 +898,37 @@ namespace Clinica_Api.Controllers
                 using (var memoryStream = new MemoryStream())
                 {
                     await documento.CopyToAsync(memoryStream);
+                    memoryStream.Position = 0;
 
-                    var img = new Imagene
+                    using (var images = new MagickImageCollection())
                     {
-                        BlobData = memoryStream.ToArray(),
-                        Letra = "",
-                        Ext = extension,
-                        Clave = int.Parse(id),
-                    };
+                        images.Read(memoryStream, new MagickReadSettings { Density = new Density(300, 300) });
 
-                    _context.Imagenes.Add(img);
-                    await _context.SaveChangesAsync();
-                    blobData = getAllDocumento(int.Parse(id));
-                    return Ok(blobData);
+                        int pageCount = 0;
+                        foreach (var pageImage in images)
+                        {
+                            if (pageCount >= 2) break;
+
+                            var pageMemoryStream = new MemoryStream();
+                            pageImage.Format = MagickFormat.Jpg;
+                            pageImage.Write(pageMemoryStream);
+                            pageMemoryStream.Position = 0;
+
+                            var documentosubir = new Complementario
+                            {
+                                BlobData = pageMemoryStream.ToArray(),
+                                Nombre = documento.FileName, // Set or adjust the 'Letra' field as necessary
+                                Ext = ".jpg", // Change the extension to JPG as we're storing images
+                                Clave = int.Parse(id),
+                            };
+
+                            _context.Complementarios.Add(documentosubir);
+                            pageCount++;
+                        }
+                        await _context.SaveChangesAsync();
+                        blobData = getAllDocumento(int.Parse(id));
+                        return Ok(blobData);
+                    }
                 }
             }
             catch (Exception ex)
@@ -913,14 +937,13 @@ namespace Clinica_Api.Controllers
             }
         }
 
-
         [HttpGet("CliniaOvController/ListaImpresionUsuario")]
         public IActionResult ListaImpresionUsuario()
         {
-            List< ConfiguracionPrint> lista = new List<ConfiguracionPrint>();
+            List<ConfiguracionPrint> lista = new List<ConfiguracionPrint>();
             try
             {
-              lista=   _context.ConfiguracionPrints.ToList();
+                lista = _context.ConfiguracionPrints.ToList();
             }
             catch (Exception ex)
             {
@@ -930,6 +953,27 @@ namespace Clinica_Api.Controllers
             return Ok(lista);
 
         }
+
+        public void ConvertPdfToJpg(string inputPdfPath, string outputDirectory)
+        {
+            using (var document = PdfReader.Open(inputPdfPath, PdfDocumentOpenMode.ReadOnly))
+            {
+                for (int i = 0; i < document.PageCount; i++)
+                {
+                    var page = document.Pages[i];
+                    using (var image = new MagickImage())
+                    {
+                        if (page != null) { 
+                        image.Read(page);
+                        string outputFile = Path.Combine(outputDirectory, $"page_{i}.jpg");
+                        image.Format = MagickFormat.Jpg;
+                        image.Write(outputFile);
+                        }
+                    }
+                }
+            }
+        }
+
         private static byte[] HexStringToByteArray(string hex)
         {
             int NumberChars = hex.Length;
