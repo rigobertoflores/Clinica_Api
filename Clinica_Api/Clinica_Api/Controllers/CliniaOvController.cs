@@ -452,6 +452,29 @@ namespace Clinica_Api.Controllers
             return Ok(blobData);
         }
 
+        [HttpPost("CliniaOvController/DeleteImagenPaciente")]
+        public IActionResult DeleteImagenPaciente([FromBody] int id)
+        {
+            List<Imagene> blobData=new List<Imagene>();
+            int clave=0;
+            try {
+                Imagene imagetodelete =_context.Imagenes.Where(imagen => imagen.Id == id).First();
+                if (imagetodelete!=null) {
+                    clave= (int)imagetodelete.Clave;
+                    _context.Remove(imagetodelete);
+                    _context.SaveChanges();
+                }
+                    
+                blobData = getAllImage(clave);
+            }
+            catch (Exception ex)
+            {
+                blobData = getAllImage(clave);
+                return Ok(blobData);
+            }
+            return Ok(blobData);
+        }
+
         [HttpPost("CliniaOvController/PostImagen")]
         public async Task<IActionResult> PostImagen(IFormFile image, [FromForm] string id)
         {
@@ -972,6 +995,31 @@ namespace Clinica_Api.Controllers
         {
             List<Complementario> blobData = getAllDocumento(id);
 
+            return Ok(blobData);
+        }
+
+        [HttpPost("CliniaOvController/DeleteComplementario")]
+        public IActionResult DeleteComplementario([FromBody] int id)
+        {
+            List<Complementario> blobData = new List<Complementario>();
+            int clave = 0;
+            try
+            {
+                Complementario complementario = _context.Complementarios.Where(compl => compl.Id == id).First();
+                if (complementario != null)
+                {
+                    clave = (int)complementario.Clave;
+                    _context.Remove(complementario);
+                    _context.SaveChanges();
+                }
+
+                blobData = getAllDocumento(clave);
+            }
+            catch (Exception ex)
+            {
+                blobData = getAllDocumento(clave);
+                return Ok(blobData);
+            }
             return Ok(blobData);
         }
         private static byte[] HexStringToByteArray(string hex)
