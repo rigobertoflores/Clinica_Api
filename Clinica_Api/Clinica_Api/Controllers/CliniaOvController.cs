@@ -76,15 +76,16 @@ namespace Clinica_Api.Controllers
                 var pacientes = _context.PacientesInformacionGenerals.ToList();
                 var pacientesActivos = pacientes.Where(p => p.FechaUltimaConsulta != null && Convert.ToDateTime(p.FechaUltimaConsulta).Year > DateTime.Now.Year - 3).ToList();
                 var pacientesInactivos = pacientes.Where(p => p.FechaUltimaConsulta != null && Convert.ToDateTime(p.FechaUltimaConsulta).Year < DateTime.Now.Year - 3).ToList();
-                var  infoNotificacionPacActivos = pacientesActivos.Select(p => new {p.Email,p.FechaConsulta, p.Nombre }).ToList();
-                var  infoNotificacionPacInactivos = pacientesInactivos.Select(p => new { p.Email, p.FechaConsulta, p.Nombre }).ToList();
+                var  infoNotificacionPacActivos = pacientesActivos.Select(p => new { p.Id, p.Email,p.FechaConsulta, p.Nombre }).ToList();
+                var  infoNotificacionPacInactivos = pacientesInactivos.Select(p => new { p.Id, p.Email, p.FechaConsulta, p.Nombre }).ToList();
                 //var infoPacientesCitas = pacientes.Where(p => p.FechaUltimaConsulta != null && Convert.ToDateTime(p.FechaUltimaConsulta).Year >= DateTime.Now.Year - 3)
                 //    .Select(p => new { p.Email, p.FechaConsulta, p.Nombre }).ToList();
+                var infoPacientesCitas = infoNotificacionPacActivos;
                 var result = new
                 {
                     PacientesActivos = infoNotificacionPacActivos,
-                    PacientesInactivos = infoNotificacionPacInactivos
-                    //PacientesConCitas = infoPacientesCitas
+                    PacientesInactivos = infoNotificacionPacInactivos,
+                    PacientesConCitas = infoPacientesCitas
                 };
                 return Ok(result);
             }

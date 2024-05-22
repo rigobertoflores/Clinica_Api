@@ -1,8 +1,17 @@
 ﻿using Clinica_Api.Modelss;
-using Microsoft.AspNetCore.Http;
+//using Google.Apis.Auth.OAuth2;
+//using Google.Apis.Gmail.v1;
+//using Google.Apis.Util.Store;
+//using MailKit.Security;
+//using MailKit.Net.Smtp;
+//using MailKit.Security;
+//using MimeKit;
+//using Google.Apis.Auth.OAuth2;
+//using Google.Apis.Util.Store;
 using Microsoft.AspNetCore.Mvc;
+
 using System.Net.Mail;
-using System.Numerics;
+
 
 namespace Clinica_Api.Controllers
 {
@@ -81,30 +90,28 @@ namespace Clinica_Api.Controllers
 
 
         [HttpGet("NotificationEmailController/SendEmail")]
-        public IActionResult SendEmail(int id)
-        {
-            string emailOrigen = "developertestkat@gmail.com";
-            string pass = "K@therine92";
-            string emailDestino = "developertestkat@gmail.com";
-            string correoTexto = "este es un correo de prueba";
+        public IActionResult SendEmail()
+        {           
 
-            MailMessage mailMessage = new MailMessage();
-            mailMessage.From = new MailAddress(emailOrigen, "AMECAE");
-            mailMessage.To.Add(new MailAddress(emailDestino, "Yo"));
-            mailMessage.Body = correoTexto;
-            mailMessage.IsBodyHtml = true;
-            mailMessage.Subject = "prueba";
-            SmtpClient smtpClient = new SmtpClient("smtp.gmail.com");
-            smtpClient.EnableSsl = true;
-            smtpClient.UseDefaultCredentials = false;
-            smtpClient.Port = 587;
-            smtpClient.Credentials = new System.Net.NetworkCredential(emailOrigen, pass);
-            smtpClient.Send(mailMessage);
-            smtpClient.Dispose();
+                string emailOrigen = "developertestkat@gmail.com";
+                string pass = "susouzafsrjtkcnw";
+                string emailDestino = "developertestkat@gmail.com";
+                string correoTexto = "este es un correo de prueba";
 
-            var plantillaAEliminar = _context.Plantillas.Where(t => t.Id == id).First();
-
-            return Ok("Correo enviado con exito");
+                MailMessage mailMessage = new MailMessage();
+                mailMessage.From = new MailAddress(emailOrigen, "AMECAE");
+                mailMessage.To.Add(new MailAddress(emailDestino, "Yo"));
+                mailMessage.Body = correoTexto;
+                mailMessage.IsBodyHtml = true;
+                mailMessage.Subject = "prueba";
+                SmtpClient smtpClient = new SmtpClient("smtp.gmail.com");
+                smtpClient.EnableSsl = true;
+                smtpClient.UseDefaultCredentials = false;
+                smtpClient.Port = 587;
+                smtpClient.Credentials = new System.Net.NetworkCredential(emailOrigen, pass);
+                smtpClient.Send(mailMessage);
+                smtpClient.Dispose();
+                return Ok("Correo enviado con exito");
         }
     }
 }
