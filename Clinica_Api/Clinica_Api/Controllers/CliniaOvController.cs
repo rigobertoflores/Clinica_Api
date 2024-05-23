@@ -51,7 +51,34 @@ namespace Clinica_Api.Controllers
         {
             try
             {
-                var contenido = _context.PacientesInformacionGenerals.OrderByDescending(x => x.FechaConsulta).FirstOrDefault();
+                var fechaActual = DateTime.Now.ToString("yyyy-MM-dd");
+                var fechaActualDateTime = DateTime.ParseExact(fechaActual, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+
+                var contenido = _context.PacientesInformacionGenerals
+    .AsEnumerable() // Convertir a enumerable para usar DateTime.ParseExact
+    .Select(x => new
+    {
+        x.FechaConsulta,
+        x.Nombre,
+        x.FechaUltimaConsulta,
+        x.Telefono,
+        x.Email,
+        x.Clave,
+        x.FechaDeNacimiento,
+        FechaConsultaDate = DateTime.ParseExact(x.FechaConsulta, "yyyy-MM-dd", CultureInfo.InvariantCulture)
+    })
+    .OrderBy(x => Math.Abs((fechaActualDateTime - x.FechaConsultaDate).TotalDays))
+    .Select(x => new
+    {
+        x.FechaConsulta,
+        x.Nombre,
+        x.FechaUltimaConsulta,
+        x.Telefono,
+        x.Email,
+        x.Clave,
+        x.FechaDeNacimiento,
+    }).FirstOrDefault();
 
                 return Ok(contenido);
             }
@@ -67,7 +94,34 @@ namespace Clinica_Api.Controllers
         {
             try
             {
-                var contenido = _context.PacientesInformacionGenerals.OrderByDescending(x => x.FechaConsulta);
+                var fechaActual = DateTime.Now.ToString("yyyy-MM-dd");
+                var fechaActualDateTime = DateTime.ParseExact(fechaActual, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+
+                var contenido = _context.PacientesInformacionGenerals
+    .AsEnumerable() // Convertir a enumerable para usar DateTime.ParseExact
+    .Select(x => new
+    {
+        x.FechaConsulta,
+        x.Nombre,
+        x.Sexo,
+        x.Clave,
+        FechaConsultaDate = DateTime.ParseExact(x.FechaConsulta, "yyyy-MM-dd", CultureInfo.InvariantCulture)
+    })
+    .OrderBy(x => Math.Abs((fechaActualDateTime - x.FechaConsultaDate).TotalDays))
+    .Select(x => new
+    {
+        x.FechaConsulta,
+        x.Nombre,
+        x.Sexo,
+        x.Clave
+    }).Union(_context.PacientesInformacionGenerals.Select(x => new
+                {
+                    x.FechaConsulta,
+                    x.Nombre,
+                    x.Sexo,
+                    x.Clave
+                }).AsEnumerable().Where(x => x.FechaConsulta == "1992-01-01")).ToList();
                 return Ok(contenido);
             }
             catch (Exception ex)
