@@ -7,7 +7,7 @@ public partial class Nota
 {
     public int Id { get; set; }
 
-    public string Notas { get; set; }
+    public string? Notas { get; set; }
 
     public int? Clave { get; set; }
 

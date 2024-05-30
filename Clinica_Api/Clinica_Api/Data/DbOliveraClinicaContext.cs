@@ -19,6 +19,10 @@ public partial class DbOliveraClinicaContext : DbContext
 
     public virtual DbSet<Commaux> Commauxes { get; set; }
 
+    public virtual DbSet<Complementario> Complementarios { get; set; }
+
+    public virtual DbSet<ConfiguracionPrint> ConfiguracionPrints { get; set; }
+
     public virtual DbSet<Dato> Datos { get; set; }
 
     public virtual DbSet<Direccione> Direcciones { get; set; }
@@ -35,10 +39,23 @@ public partial class DbOliveraClinicaContext : DbContext
 
     public virtual DbSet<Imagene> Imagenes { get; set; }
 
+    public virtual DbSet<InformeExpediente> InformeExpedientes { get; set; }
+
+    public virtual DbSet<InformeOperatorio> InformeOperatorios { get; set; }
+
     public virtual DbSet<Nota> Notas { get; set; }
+
     public virtual DbSet<Observacione> Observaciones { get; set; }
 
     public virtual DbSet<PacientesInformacionGeneral> PacientesInformacionGenerals { get; set; }
+
+    public virtual DbSet<Plantilla> Plantillas { get; set; }
+
+    public virtual DbSet<Query> Queries { get; set; }
+
+    public virtual DbSet<Query1> Query1s { get; set; }
+
+    public virtual DbSet<Query2> Query2s { get; set; }
 
     public virtual DbSet<Receta> Recetas { get; set; }
 
@@ -46,22 +63,16 @@ public partial class DbOliveraClinicaContext : DbContext
 
     public virtual DbSet<RecetasxPaciente> RecetasxPacientes { get; set; }
 
-    public virtual DbSet<InformeExpediente> InformeExpedientes { get; set; }
-
-    public virtual DbSet<InformeOperatorio> InformeOperatorios { get; set; }
-
+    public virtual DbSet<RelacionPlantilllaPaciente> RelacionPlantilllaPacientes { get; set; }
 
     public virtual DbSet<TratamientosEnfermedade> TratamientosEnfermedades { get; set; }
-    public virtual DbSet<Plantillas> Plantillas { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=LAPTOP-UB7952GK\\MSSQLSERVER01;Integrated Security=True;Connect Timeout=300;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Database=db_olivera_clinica;Trusted_Connection=True;");
+        => optionsBuilder.UseSqlServer("Data Source=LAPTOP-UB7952GK\\MSSQLSERVER01;Initial Catalog=db_olivera_clinica;Integrated Security=True;Connect Timeout=300;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False;Database=db_olivera_clinica;Trusted_Connection=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.UseCollation("Modern_Spanish_CI_AS");
-
         modelBuilder.Entity<Agendum>(entity =>
         {
             entity.HasKey(e => new { e.Dia, e.Hora }).HasName("PK_Agenda_Agenda_Agenda");
@@ -118,6 +129,49 @@ public partial class DbOliveraClinicaContext : DbContext
             entity.Property(e => e.Ultima).HasMaxLength(50);
         });
 
+        modelBuilder.Entity<Complementario>(entity =>
+        {
+            entity.Property(e => e.Ext)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Nombre)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<ConfiguracionPrint>(entity =>
+        {
+            entity.ToTable("ConfiguracionPrint");
+
+            entity.Property(e => e.Ancho)
+                .HasColumnType("numeric(18, 2)")
+                .HasColumnName("ancho");
+            entity.Property(e => e.Encabezado)
+                .IsUnicode(false)
+                .HasColumnName("encabezado");
+            entity.Property(e => e.Espacio)
+                .HasColumnType("numeric(18, 2)")
+                .HasColumnName("espacio");
+            entity.Property(e => e.Largo)
+                .HasColumnType("numeric(18, 2)")
+                .HasColumnName("largo");
+            entity.Property(e => e.MargenAbajo)
+                .HasColumnType("numeric(18, 2)")
+                .HasColumnName("margen_abajo");
+            entity.Property(e => e.MargenArriba)
+                .HasColumnType("numeric(18, 2)")
+                .HasColumnName("margen_arriba");
+            entity.Property(e => e.MargenDerecho)
+                .HasColumnType("numeric(18, 2)")
+                .HasColumnName("margen_derecho");
+            entity.Property(e => e.MargenIzquierdo)
+                .HasColumnType("numeric(18, 2)")
+                .HasColumnName("margen_izquierdo");
+            entity.Property(e => e.Usuario)
+                .HasMaxLength(50)
+                .HasColumnName("usuario");
+        });
+
         modelBuilder.Entity<Dato>(entity =>
         {
             entity.HasKey(e => new { e.Id, e.Letra, e.Ext }).HasName("PK_LosDatos_LosDatos");
@@ -166,11 +220,9 @@ public partial class DbOliveraClinicaContext : DbContext
         modelBuilder.Entity<Expediente>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_pacientes_pacientes_pacientes");
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
             entity.Property(e => e.Expediente1).HasColumnName("Expediente");
-            entity.Property(e => e.HistoriaId)
-                .HasMaxLength(9)
-                .HasDefaultValueSql("('Pacientes')");
+            entity.Property(e => e.HistoriaId).HasMaxLength(9);
         });
 
         modelBuilder.Entity<ExpedienteX>(entity =>
@@ -195,21 +247,45 @@ public partial class DbOliveraClinicaContext : DbContext
         modelBuilder.Entity<Historia>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_Historias_Historias");
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
-            entity.Property(e => e.Id).HasColumnName("ID");
+
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("ID");
             entity.Property(e => e.Hc).HasColumnName("HC");
             entity.Property(e => e.Nombre).HasMaxLength(50);
         });
 
         modelBuilder.Entity<Imagene>(entity =>
         {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.HasKey(e => e.Id).HasName("PK__Imagenes__3214EC071145AA1D");
 
-            entity.Property(e => e.Id).HasColumnName("ID");
-            entity.Property(e => e.Letra).HasMaxLength(40);
-            entity.Property(e => e.Ext).HasMaxLength(10);
-            entity.Property(e => e.Clave);
+            entity.Property(e => e.Ext)
+                .HasMaxLength(10)
+                .IsUnicode(false);
+            entity.Property(e => e.Letra)
+                .HasMaxLength(40)
+                .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<InformeExpediente>(entity =>
+        {
+            entity.ToTable("Informe_Expediente");
+
+            entity.Property(e => e.InformeId).HasMaxLength(9);
+        });
+
+        modelBuilder.Entity<InformeOperatorio>(entity =>
+        {
+            entity.ToTable("Informe_Operatorio");
+        });
+
+        modelBuilder.Entity<Nota>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Notas__3214EC077D6337B0");
+
+            entity.Property(e => e.Fecha)
+                .HasMaxLength(10)
+                .IsFixedLength();
         });
 
         modelBuilder.Entity<Observacione>(entity =>
@@ -225,24 +301,12 @@ public partial class DbOliveraClinicaContext : DbContext
             entity.Property(e => e.O4).HasMaxLength(21);
         });
 
-        modelBuilder.Entity<Nota>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
-            entity.ToTable("Notas");
-            entity.Property(e => e.Fecha)
-                .HasMaxLength(10)
-                .IsFixedLength();
-        });
-
         modelBuilder.Entity<PacientesInformacionGeneral>(entity =>
         {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
-            entity.Property(e => e.Clave);
+            entity.HasKey(e => e.Id).HasName("PK__Paciente__3214EC075F8E2CD2");
+
             entity.ToTable("Pacientes_InformacionGeneral");
 
-            entity.Property(e => e.Clave).ValueGeneratedNever();
             entity.Property(e => e.Alcoholismo).HasMaxLength(255);
             entity.Property(e => e.Alergia).HasMaxLength(255);
             entity.Property(e => e.Amigdalitis).HasMaxLength(255);
@@ -308,15 +372,65 @@ public partial class DbOliveraClinicaContext : DbContext
             entity.Property(e => e.Tumores).HasMaxLength(500);
         });
 
-        modelBuilder.Entity<PacientesInformacionGeneral1>(entity =>
+        modelBuilder.Entity<Plantilla>(entity =>
+        {
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Adjunto)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Asunto)
+                .HasMaxLength(450)
+                .IsUnicode(false);
+            entity.Property(e => e.CuerpoEmail).IsUnicode(false);
+            entity.Property(e => e.FechaEnvio).HasColumnType("date");
+            entity.Property(e => e.Nombre)
+                .HasMaxLength(250)
+                .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<Query>(entity =>
         {
             entity
                 .HasNoKey()
-                .ToTable("PacientesInformacionGeneral");
+                .ToTable("Query");
 
-            entity.Property(e => e.Fecha)
-                .HasColumnType("date")
-                .HasColumnName("fecha");
+            entity.Property(e => e.BlobData).HasColumnType("image");
+            entity.Property(e => e.Ext)
+                .HasMaxLength(10)
+                .IsUnicode(false);
+            entity.Property(e => e.Letra)
+                .HasMaxLength(40)
+                .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<Query1>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToTable("Query1");
+
+            entity.Property(e => e.BlobData).HasColumnType("image");
+            entity.Property(e => e.Ext)
+                .HasMaxLength(10)
+                .IsUnicode(false);
+            entity.Property(e => e.Letra)
+                .HasMaxLength(40)
+                .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<Query2>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToTable("Query2");
+
+            entity.Property(e => e.BlobData).HasColumnType("image");
+            entity.Property(e => e.Ext)
+                .HasMaxLength(10)
+                .IsUnicode(false);
+            entity.Property(e => e.Letra)
+                .HasMaxLength(40)
+                .IsUnicode(false);
         });
 
         modelBuilder.Entity<Receta>(entity =>
@@ -340,28 +454,22 @@ public partial class DbOliveraClinicaContext : DbContext
 
         modelBuilder.Entity<RecetasxPaciente>(entity =>
         {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.HasKey(e => e.Id).HasName("PK__Recetasx__3214EC07D3352EC0");
+
             entity.ToTable("RecetasxPaciente");
+
             entity.Property(e => e.Fecha).HasMaxLength(50);
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
         });
 
-        modelBuilder.Entity<InformeExpediente>(entity =>
+        modelBuilder.Entity<RelacionPlantilllaPaciente>(entity =>
         {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
-            entity.ToTable("Informe_Expediente");
-            entity.Property(e => e.InformeId).HasMaxLength(9);
-        });
+            entity.ToTable("RelacionPlantilllaPaciente");
 
-        modelBuilder.Entity<InformeOperatorio>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
-            entity.ToTable("Informe_Operatorio");
-            entity.Property(e => e.Informe).IsUnicode(false);
-            entity.Property(e => e.Nombre).IsUnicode(false);
+            entity.Property(e => e.FechaCreacion).HasColumnType("date");
+            entity.Property(e => e.FechaUltActualizacion).HasColumnType("date");
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .IsUnicode(false);
         });
 
         modelBuilder.Entity<TratamientosEnfermedade>(entity =>
@@ -371,23 +479,6 @@ public partial class DbOliveraClinicaContext : DbContext
                 .HasMaxLength(300)
                 .IsUnicode(false);
             entity.Property(e => e.PalabrasClaves).HasMaxLength(250);
-        });
-
-        modelBuilder.Entity<Plantillas>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK_Plantillas");
-            entity.Property(e => e.Id).HasColumnName("id") ;
-            entity.Property(e => e.Nombre)
-                .IsRequired() // Indica que el campo no puede ser nulo
-                .HasMaxLength(250); // Ajusta según si necesitas soporte Unicode o no
-            entity.Property(e => e.Asunto)
-                .HasMaxLength(450); // Especifica la longitud máxima, deja el Unicode predeterminado si necesario
-            entity.Property(e => e.CuerpoEmail); // Especifica el tipo de dato si es necesario
-            entity.Property(e => e.FechaEnvio)
-                .IsRequired(); // Asegura que el tipo de dato coincide con la base de datos
-            entity.Property(e => e.Adjunto)
-                .IsRequired() // Indica que el campo no puede ser nulo
-                .HasMaxLength(50); // Especifica la longitud máxima
         });
 
         OnModelCreatingPartial(modelBuilder);
