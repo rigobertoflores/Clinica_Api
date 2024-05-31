@@ -326,6 +326,25 @@ namespace Clinica_Api.Controllers
             return citas.ToList();
         }
 
+        [HttpGet("NotificationEmailController/ObtenerStatusCorreos")]
+        public IActionResult ObtenerStatusCorreos()
+        {
+            var listRelaciones = new List<RelacionPlantilllaPaciente>();
+            try
+            {              
+                listRelaciones = _context.RelacionPlantilllaPacientes.ToList(); 
+               
+            }
+            catch (Exception ex)
+            {
+                // Maneja cualquier error que pueda ocurrir durante el guardado.
+                return StatusCode(500, "No se pudo guardar la información del paciente. Error: " + ex.Message);
+            }
+
+            return Ok(listRelaciones.OrderByDescending(x => x.FechaUltActualizacion));
+        }
+
+
         #endregion
     }
 }
