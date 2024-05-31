@@ -24,5 +24,4 @@ public partial class ConfiguracionPrint
 
     public string? Encabezado { get; set; }
 
-    public decimal? Espacio { get; set; }
 }
