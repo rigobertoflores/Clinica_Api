@@ -131,6 +131,37 @@ namespace Clinica_Api.Controllers
             }
         }
 
+        [HttpGet("CliniaOvController/GetPacientesNotificacionesCitas")]
+        public IActionResult GetPacientesConCitas()
+        {
+            try
+            {
+
+                var pacientes = _context.PacientesInformacionGenerals.ToList();
+                var pacientesActivos = pacientes.Where(p => p.FechaUltimaConsulta != null && Convert.ToDateTime(p.FechaUltimaConsulta).Year > DateTime.Now.Year - 3).ToList();
+                var pacientesInactivos = pacientes.Where(p => p.FechaUltimaConsulta != null && Convert.ToDateTime(p.FechaUltimaConsulta).Year < DateTime.Now.Year - 3).ToList();
+                var infoNotificacionPacActivos = pacientesActivos.Select(p => new { p.Id, p.Email, p.FechaConsulta, p.Nombre }).ToList();
+                var infoNotificacionPacInactivos = pacientesInactivos.Select(p => new { p.Id, p.Email, p.FechaConsulta, p.Nombre }).ToList();
+                //var infoPacientesCitas = pacientes.Where(p => p.FechaUltimaConsulta != null && Convert.ToDateTime(p.FechaUltimaConsulta).Year >= DateTime.Now.Year - 3)
+                //    .Select(p => new { p.Email, p.FechaConsulta, p.Nombre }).ToList();
+                var infoPacientesCitas = infoNotificacionPacActivos;
+                var result = new
+                {
+                    PacientesActivos = infoNotificacionPacActivos,
+                    PacientesInactivos = infoNotificacionPacInactivos,
+                    PacientesConCitas = infoPacientesCitas
+                };
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                // Maneja cualquier error que pueda ocurrir durante el guardado.
+                return StatusCode(500, "No se pudo guardar la información del paciente. Error: " + ex.Message);
+            }
+        }
+
+
+
         [HttpGet("CliniaOvController/GetPacienteId/{id:int}")]
         public IActionResult GetPacienteId(int id)
         {
@@ -1083,6 +1114,26 @@ namespace Clinica_Api.Controllers
             for (int i = 0; i < NumberChars; i += 2)
                 bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
             return bytes;
+        }
+
+        [HttpGet("CliniaOvController/GetCitasPorFecha/{fecha}")]
+        public IActionResult GetCitasPorFecha([FromRoute] string fecha)
+        {
+
+            var pacientes = _context.PacientesInformacionGenerals.ToList();
+
+            try
+            {
+                var citas = pacientes.Where(c => c.FechaConsulta == fecha).Select(citas => new
+                { citas.Id, citas.Email, citas.FechaConsulta, citas.Nombre }
+                ).ToList();
+                return Ok(citas);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "No se pudo obtener la información de la cita del paciente. Error: " + ex.Message);
+            }
+            return Ok(pacientes);
         }
 
     }

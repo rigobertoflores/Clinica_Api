@@ -2,6 +2,9 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
+/Clinica_Api/Clinica_Api/obj/Release/net6.0
+/.vs/Clinica_api
+/.vs
 /Clinica_Api/.vs/Clinica_Api/FileContentIndex
 /Clinica_Api/Clinica_Api/bin/Release/net6.0/publish
 /Clinica_Api/Clinica_Api/bin/Release/net6.0

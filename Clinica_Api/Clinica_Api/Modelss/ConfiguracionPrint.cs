@@ -23,4 +23,6 @@ public partial class ConfiguracionPrint
     public string Usuario { get; set; } = null!;
 
     public string? Encabezado { get; set; }
+
+    public decimal? Espacio { get; set; }
 }
