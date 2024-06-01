@@ -8,7 +8,6 @@ public partial class ConfiguracionPrint
     public int Id { get; set; }
 
     public decimal? Largo { get; set; }
-    public decimal? Espacio { get; set; }
 
     public decimal? Ancho { get; set; }
 
@@ -24,4 +23,5 @@ public partial class ConfiguracionPrint
 
     public string? Encabezado { get; set; }
 
+    public decimal? Espacio { get; set; }
 }

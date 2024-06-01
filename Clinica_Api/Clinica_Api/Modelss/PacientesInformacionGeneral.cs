@@ -111,7 +111,7 @@ public partial class PacientesInformacionGeneral
 
     public string? Nombre { get; set; }
 
-    public string? FechaConsulta { get; set; }
+    public DateTime? FechaConsulta { get; set; }
 
-    public string? FechaUltimaConsulta { get; set; }
+    public DateTime? FechaUltimaConsulta { get; set; }
 }
