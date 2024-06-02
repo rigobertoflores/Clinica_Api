@@ -79,7 +79,7 @@ namespace Clinica_Api.Controllers
                 if (!string.IsNullOrEmpty(filter))
                 {
                     filter = filter.ToLower();
-                    query = query.Where(p => p.Nombre.ToLower().Contains(filter);
+                    query = query.Where(p => p.Nombre.ToLower().Contains(filter));
                 }
 
                 var totalPacientes = query.Count();
