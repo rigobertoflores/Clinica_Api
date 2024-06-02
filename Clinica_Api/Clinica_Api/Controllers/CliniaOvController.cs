@@ -70,24 +70,37 @@ namespace Clinica_Api.Controllers
         }
 
         [HttpGet("CliniaOvController/GetPacientes")]
-        public IActionResult GetPacientes()
+        public IActionResult GetPacientes(int pageIndex,int pageSize,string? filter = "")
         {
             try
             {
-                var contenido = _context.PacientesInformacionGenerals.OrderByDescending(x => x.FechaConsulta)
-    .Select(x => new
-    {
+                var query = _context.PacientesInformacionGenerals.AsQueryable();
+
+                if (!string.IsNullOrEmpty(filter))
+                {
+                    filter = filter.ToLower();
+                    query = query.Where(p => p.Nombre.ToLower().Contains(filter);
+                }
+
+                var totalPacientes = query.Count();
+
+                var contenido = query.OrderByDescending(x => x.FechaConsulta).Skip(pageIndex * pageSize)
+        .Take(pageSize).Select(x => new{
         x.FechaConsulta,
         x.Nombre,
         x.Sexo,
         x.Clave
-    });
-                return Ok(contenido);
+        });
+                return Ok(new
+                {
+                    items = contenido,
+                    totalCount = totalPacientes
+                });
             }
             catch (Exception ex)
             {
                 // Maneja cualquier error que pueda ocurrir durante el guardado.
-                return StatusCode(500, "No se pudo guardar la información del paciente. Error: " + ex.Message);
+                return StatusCode(500, "No se pudo obtener la información del paciente. Error: " + ex.Message);
             }
         }
 
