@@ -309,14 +309,14 @@ namespace Clinica_Api.Controllers
 
             try
             {
-                //citas.AddRange(pacientes.Where(c => c.FechaConsulta == fecha).Select(citas => new PacientesCitas()
-                //{
-                //    ID = citas.Id.ToString(),
-                //    Email = citas.Email,
-                //    FechaConsulta = citas.FechaConsulta,
-                //    Nombre = citas.Nombre
-                //}
-                //));
+                citas.AddRange(pacientes.Where(c => c.FechaConsulta == Convert.ToDateTime(fecha)).Select(citas => new PacientesCitas()
+                {
+                    ID = citas.Id.ToString(),
+                    Email = citas.Email,
+                    FechaConsulta = citas.FechaConsulta,
+                    Nombre = citas.Nombre
+                }
+                ));
 
             }
             catch (Exception ex)
@@ -368,6 +368,6 @@ public class PacientesCitas
 {
     public string ID { get; set; }
     public string? Email { get; set; }
-    public string? FechaConsulta { get; set; }
+    public DateTime? FechaConsulta { get; set; }
     public string? Nombre { get; set; }
 }
