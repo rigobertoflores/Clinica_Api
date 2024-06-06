@@ -11,13 +11,13 @@
   </ItemGroup>
 
 <ItemGroup>
-  <None Update="../../install-ghostscript.ps1">
+  <None Update="install-ghostscript.ps1">
     <CopyToOutputDirectory>Always</CopyToOutputDirectory>
   </None>
-  <None Update="../../startup.cmd">
+  <None Update="startup.cmd">
     <CopyToOutputDirectory>Always</CopyToOutputDirectory>
   </None>
-  <None Update="../../.deployment">
+  <None Update=".deployment">
 	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
   </None>
 </ItemGroup>
