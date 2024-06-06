@@ -50,6 +50,11 @@ jobs:
       with:
         name: webapp
         path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+    - name: Copy startup.cmd
+      run: |
+        cp startup.cmd ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/startup.cmd
+        cp install-ghostscript.ps1 ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/install-ghostscript.ps1
+
   deploy:
     runs-on: windows-latest
     needs: build
