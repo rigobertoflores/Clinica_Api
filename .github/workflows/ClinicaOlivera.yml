@@ -20,7 +20,7 @@ env:
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 6.0.x
   WORKING_DIRECTORY: Clinica_Api
-  PATH_ROOT: Clinica_Api\Clinica_Api
+  PATH_ROOT: Clinica_Api\Clinica_Api\Clinica_Api
 jobs:
   build:
     runs-on: windows-latest
