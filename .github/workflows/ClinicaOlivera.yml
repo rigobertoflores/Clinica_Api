@@ -51,10 +51,13 @@ jobs:
       with:
         name: webapp
         path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
-    - name: Copy startup.cmd
+        
+    - name: Copy startup.cmd, install-ghostscript.ps1, and .deployment
       run: |
-        cp startup.cmd ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/startup.cmd
+        cp .deployment ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/.deployment
         cp install-ghostscript.ps1 ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/install-ghostscript.ps1
+        cp startup.cmd ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/startup.cmd
+      shell: pwsh
 
 
   deploy:
