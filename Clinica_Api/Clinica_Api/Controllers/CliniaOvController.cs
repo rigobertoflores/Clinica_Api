@@ -13,8 +13,8 @@ using System.Globalization;
 using System.Collections;
 using System.Reflection.PortableExecutable;
 using PdfSharp.Pdf.IO;
-using ImageMagick;
 using Microsoft.EntityFrameworkCore;
+using ImageMagick;
 
 namespace Clinica_Api.Controllers
 {
