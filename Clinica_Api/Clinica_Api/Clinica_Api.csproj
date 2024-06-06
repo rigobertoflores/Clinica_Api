@@ -10,20 +10,12 @@
     <Compile Remove="Modelss\DbOliveraClinicaContext.cs" />
   </ItemGroup>
 
-<ItemGroup>
-  <None Update="install-ghostscript.ps1">
-    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-  </None>
-  <None Update="startup.cmd">
-    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-  </None>
-  <None Update=".deployment">
-	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-  </None>
-</ItemGroup>
 
   <ItemGroup>
     <None Include="dll\libwkhtmltox.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="dll\gsdll64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
