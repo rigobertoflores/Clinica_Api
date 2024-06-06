@@ -11,16 +11,14 @@
   </ItemGroup>
 
 
+
   <ItemGroup>
     <None Include="dll\libwkhtmltox.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="dll\gsdll64.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="dll\gs10031w64.exe">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+	  <None Include="dll\gs10031w64.exe">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
   </ItemGroup>
 
   <ItemGroup>
