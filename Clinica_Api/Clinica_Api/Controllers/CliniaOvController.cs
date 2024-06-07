@@ -8,7 +8,6 @@ using Clinica_Api.Modelss;
 using System.Globalization;
 using System.Collections;
 using System.Reflection.PortableExecutable;
-using PdfSharp.Pdf.IO;
 using Microsoft.EntityFrameworkCore;
 using Spire.Pdf;
 using Spire.Pdf.Graphics;
