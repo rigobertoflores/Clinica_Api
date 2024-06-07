@@ -5,16 +5,16 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using Image = System.Drawing.Image;
 using Clinica_Api.Modelss;
-using System.Collections.Generic;
-using Microsoft.Win32;
-using DinkToPdf;
-using DinkToPdf.Contracts;
 using System.Globalization;
 using System.Collections;
 using System.Reflection.PortableExecutable;
 using PdfSharp.Pdf.IO;
 using Microsoft.EntityFrameworkCore;
-using ImageMagick;
+using Spire.Pdf;
+using Spire.Pdf.Graphics;
+using System.Drawing.Imaging;
+using DinkToPdf;
+using DinkToPdf.Contracts;
 
 namespace Clinica_Api.Controllers
 {
@@ -1069,31 +1069,33 @@ namespace Clinica_Api.Controllers
 
                     if (extension == ".pdf")
                     {
-                        using (var images = new MagickImageCollection())
+                        memoryStream.Position = 0;
+                        PdfDocument pdfDocument = new PdfDocument();
+                        pdfDocument.LoadFromStream(memoryStream);
+                        int totalPages = pdfDocument.Pages.Count;
+                        int pageCount = 0;
+                        
+                        for (int i = 0; i < totalPages && pageCount < 2; i++)
                         {
-                            memoryStream.Position = 0;
-                            images.Read(memoryStream, new MagickReadSettings { Density = new Density(300, 300) });
-
-                            int pageCount = 0;
-                            foreach (var pageImage in images)
+                            var pageImageStream = new MemoryStream();
+                            var imagen = pdfDocument.SaveAsImage(i);
+                            using (var image = Image.FromStream(imagen))
                             {
-                                if (pageCount >= 2) break;
-
-                                var pageMemoryStream = new MemoryStream();
-                                pageImage.Format = MagickFormat.Jpg;
-                                pageImage.Write(pageMemoryStream);
-                                pageMemoryStream.Position = 0;
-
-                                var documentosubir = new Complementario
-                                {
-                                    BlobData = pageMemoryStream.ToArray(),
-                                    Nombre = documento.FileName,
-                                    Ext = ".jpg",
-                                    Clave = int.Parse(id),
-                                };
-                                _context.Complementarios.Add(documentosubir);
-                                pageCount++;
+                                image.Save(pageImageStream, ImageFormat.Jpeg);
                             }
+                             
+                            pageImageStream.Position = 0;
+
+                            var documentosubir = new Complementario
+                            {
+                                BlobData = pageImageStream.ToArray(),
+                                Nombre = documento.FileName,
+                                Ext = ".jpg",
+                                Clave = int.Parse(id),
+                            };
+                            _context.Complementarios.Add(documentosubir);
+
+                            pageCount++;
                         }
                     }
                     else
@@ -1102,7 +1104,7 @@ namespace Clinica_Api.Controllers
                         {
                             BlobData = memoryStream.ToArray(),
                             Nombre = documento.FileName,
-                            Ext = ".jpg",
+                            Ext = extension,
                             Clave = int.Parse(id),
                         };
                         _context.Complementarios.Add(documentosubir);
@@ -1117,6 +1119,7 @@ namespace Clinica_Api.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
 
         [HttpGet("CliniaOvController/ListaImpresionUsuario")]
         public IActionResult ListaImpresionUsuario()
