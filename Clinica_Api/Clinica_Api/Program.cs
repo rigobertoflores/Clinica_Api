@@ -5,6 +5,8 @@ using Microsoft.OpenApi.Models;
 using Clinica_Api.Modelss;
 using DinkToPdf.Contracts;
 using DinkToPdf;
+using System.Reflection;
+using System.Runtime.Loader;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +18,12 @@ builder.Services.AddCors(options =>
                             .AllowAnyHeader()
                             .AllowAnyMethod());
 });
+
+var absolutePath = Path.Combine(AppContext.BaseDirectory, "dll", "libwkhtmltox.dll");
+
+CustomAssemblyLoadContext context = new CustomAssemblyLoadContext();
+context.LoadUnmanagedLibrary(absolutePath);
+
 
 
 // Add services to the container.
@@ -60,3 +68,22 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.Run();
+
+
+public class CustomAssemblyLoadContext : AssemblyLoadContext
+{
+    public IntPtr LoadUnmanagedLibrary(string absolutePath)
+    {
+        return LoadUnmanagedDll(absolutePath);
+    }
+
+    protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
+    {
+        return LoadUnmanagedDllFromPath(unmanagedDllName);
+    }
+
+    protected override Assembly Load(AssemblyName assemblyName)
+    {
+        throw new NotImplementedException();
+    }
+}

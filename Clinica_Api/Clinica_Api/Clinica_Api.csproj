@@ -10,13 +10,11 @@
     <Compile Remove="Modelss\DbOliveraClinicaContext.cs" />
   </ItemGroup>
 
- 
-
-  <ItemGroup>
-    <None Include="libwkhtmltox.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+  <None Update="dll\libwkhtmltox.dll">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </None>
+</ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="DinkToPdf" Version="1.0.8" />
@@ -35,10 +33,6 @@
     <PackageReference Include="Microsoft.Identity.Web.UI" Version="2.18.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="System.Drawing.Common" Version="8.0.4" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="dll\" />
   </ItemGroup>
 
 </Project>
