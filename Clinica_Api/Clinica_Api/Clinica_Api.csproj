@@ -10,14 +10,8 @@
     <Compile Remove="Modelss\DbOliveraClinicaContext.cs" />
   </ItemGroup>
 
-	<ItemGroup>
-  <None Update="dll\libwkhtmltox.dll">
-    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-  </None>
-</ItemGroup>
-
   <ItemGroup>
-    <PackageReference Include="DinkToPdf" Version="1.0.8" />
+    <PackageReference Include="DinkToPdfAll" Version="1.0.5" />
     <PackageReference Include="FreeSpire.PDF" Version="10.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.14" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.14">

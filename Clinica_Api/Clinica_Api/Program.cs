@@ -3,10 +3,11 @@ using Microsoft.Identity.Web.UI;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
 using Clinica_Api.Modelss;
-using DinkToPdf.Contracts;
-using DinkToPdf;
+using DinkToPdfAll;
 using System.Reflection;
 using System.Runtime.Loader;
+using DinkToPdf.Contracts;
+using DinkToPdf;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,15 +20,11 @@ builder.Services.AddCors(options =>
                             .AllowAnyMethod());
 });
 
-var absolutePath = Path.Combine(AppContext.BaseDirectory, "dll", "libwkhtmltox.dll");
+DinkToPdfAll.LibraryLoader.Load();
 
-CustomAssemblyLoadContext context = new CustomAssemblyLoadContext();
-context.LoadUnmanagedLibrary(absolutePath);
-
-
-
-// Add services to the container.
+// Agregar servicios al contenedor.
 builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
+
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -69,21 +66,3 @@ app.UseAuthorization();
 
 app.Run();
 
-
-public class CustomAssemblyLoadContext : AssemblyLoadContext
-{
-    public IntPtr LoadUnmanagedLibrary(string absolutePath)
-    {
-        return LoadUnmanagedDll(absolutePath);
-    }
-
-    protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
-    {
-        return LoadUnmanagedDllFromPath(unmanagedDllName);
-    }
-
-    protected override Assembly Load(AssemblyName assemblyName)
-    {
-        throw new NotImplementedException();
-    }
-}
