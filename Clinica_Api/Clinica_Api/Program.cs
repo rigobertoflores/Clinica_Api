@@ -20,41 +20,34 @@ builder.Services.AddCors(options =>
                             .AllowAnyMethod());
 });
 
-//// Construir la ruta absoluta para la biblioteca nativa
+// Construir la ruta absoluta para la biblioteca nativa
 //var absolutePath = Path.Combine(AppContext.BaseDirectory, "lib", "libwkhtmltox.dll");
 
 //CustomAssemblyLoadContext context = new CustomAssemblyLoadContext();
 
-
+// Agregar servicios al contenedor.
+builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
 //string path;
 //string runtimeArchitecture = RuntimeInformation.ProcessArchitecture.ToString().ToLower();
 
-//var architectureFolder = (IntPtr.Size == 8) ? "X64\\libwkhtmltox" : "X86\\libwkhtmltox";
-//string dl = architectureFolder + ".dll";
-//string so = architectureFolder + ".so";
-//string dylib = architectureFolder + ".dylib";
+//var architectureFolder = (IntPtr.Size == 8) ? "x64" : "x86";
 
-
-
-//// Construir la ruta absoluta para la biblioteca nativa
-//var projectRootFolder = AppContext.BaseDirectory;
-
+//string projectRootFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
 
 //if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-//    path = Path.Combine(projectRootFolder, "lib",dl);
+//    path = Path.Combine(projectRootFolder, "runtimes\\win-", architectureFolder, "\\native", "libwkhtmltox.dll");
 //else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-//    path = Path.Combine(projectRootFolder, "lib",so);
+//    path = Path.Combine(projectRootFolder, "runtimes\\linux-", runtimeArchitecture, "\\native", "libwkhtmltox.so");
 //else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-//    path = Path.Combine(projectRootFolder, "lib",dylib);
+//    path = Path.Combine(projectRootFolder, "runtimes\\osx-", runtimeArchitecture, "\\native", "libwkhtmltox.dylib");
 //else
 //    throw new InvalidOperationException("Supported OS Platform not found");
 
 
 //context.LoadUnmanagedLibrary(path);
 
-// Agregar servicios al contenedor.
-builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
+
 
 
 builder.Services.AddControllers();

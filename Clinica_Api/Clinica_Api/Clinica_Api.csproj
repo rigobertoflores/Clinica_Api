@@ -4,36 +4,45 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>true</IsPackable>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Remove="Modelss\DbOliveraClinicaContext.cs" />
   </ItemGroup>
- <ItemGroup>
-    <Content Include="lib\x86\libwkhtmltox.dll" Pack="true" PackagePath="runtimes\win-x86\native">
-      <CopyToPublishDirectory>True</CopyToPublishDirectory>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="lib\X64\libwkhtmltox.dll" Pack="true" PackagePath="runtimes\win-x64\native">
-      <CopyToPublishDirectory>True</CopyToPublishDirectory>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="lib\X64\libwkhtmltox.dylib" Pack="true" PackagePath="runtimes\osx-x64\native">
-      <CopyToPublishDirectory>True</CopyToPublishDirectory>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="lib\X86\libwkhtmltox.so" Pack="true" PackagePath="runtimes\linux-x86\native">
-      <CopyToPublishDirectory>True</CopyToPublishDirectory>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="lib\X64\libwkhtmltox.so" Pack="true" PackagePath="runtimes\linux-x64\native">
-      <CopyToPublishDirectory>True</CopyToPublishDirectory>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup> 
+<ItemGroup>
+  <Content Include="lib\x86\libwkhtmltox.dll">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    <PackagePath>runtimes\win-x86\native\libwkhtmltox.dll</PackagePath>
+  </Content>
+  <Content Include="lib\x64\libwkhtmltox.dll">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    <PackagePath>runtimes\win-x64\native\libwkhtmltox.dll</PackagePath>
+  </Content>
+  <Content Include="lib\x64\libwkhtmltox.dylib">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    <PackagePath>runtimes\osx-x64\native\libwkhtmltox.dylib</PackagePath>
+  </Content>
+  <Content Include="lib\x86\libwkhtmltox.so">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    <PackagePath>runtimes\linux-x86\native\libwkhtmltox.so</PackagePath>
+  </Content>
+  <Content Include="lib\x64\libwkhtmltox.so">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    <PackagePath>runtimes\linux-x64\native\libwkhtmltox.so</PackagePath>
+  </Content>
+</ItemGroup>
+
+
   <ItemGroup>
-    <PackageReference Include="DinkToPdf" Version="1.0.8" />
-    <PackageReference Include="DinkToPdfIncludesDependencies" Version="1.0.8" />
+    <PackageReference Include="DinkToPdf.Standard" Version="1.1.0" />
     <PackageReference Include="FreeSpire.PDF" Version="10.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.14" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.14">
