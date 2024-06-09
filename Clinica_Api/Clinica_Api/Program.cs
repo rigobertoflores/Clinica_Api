@@ -20,38 +20,38 @@ builder.Services.AddCors(options =>
                             .AllowAnyMethod());
 });
 
-// Construir la ruta absoluta para la biblioteca nativa
-var absolutePath = Path.Combine(AppContext.BaseDirectory, "lib", "libwkhtmltox.dll");
+//// Construir la ruta absoluta para la biblioteca nativa
+//var absolutePath = Path.Combine(AppContext.BaseDirectory, "lib", "libwkhtmltox.dll");
 
-CustomAssemblyLoadContext context = new CustomAssemblyLoadContext();
-
-
-string path;
-string runtimeArchitecture = RuntimeInformation.ProcessArchitecture.ToString().ToLower();
-
-var architectureFolder = (IntPtr.Size == 8) ? "X64\\libwkhtmltox" : "X86\\libwkhtmltox";
-string dl = architectureFolder + ".dll";
-string so = architectureFolder + ".so";
-string dylib = architectureFolder + ".dylib";
+//CustomAssemblyLoadContext context = new CustomAssemblyLoadContext();
 
 
+//string path;
+//string runtimeArchitecture = RuntimeInformation.ProcessArchitecture.ToString().ToLower();
 
-// Construir la ruta absoluta para la biblioteca nativa
-var projectRootFolder = AppContext.BaseDirectory;
+//var architectureFolder = (IntPtr.Size == 8) ? "X64\\libwkhtmltox" : "X86\\libwkhtmltox";
+//string dl = architectureFolder + ".dll";
+//string so = architectureFolder + ".so";
+//string dylib = architectureFolder + ".dylib";
 
 
 
-if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-    path = Path.Combine(projectRootFolder, "lib",dl);
-else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-    path = Path.Combine(projectRootFolder, "lib",so);
-else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-    path = Path.Combine(projectRootFolder, "lib",dylib);
-else
-    throw new InvalidOperationException("Supported OS Platform not found");
+//// Construir la ruta absoluta para la biblioteca nativa
+//var projectRootFolder = AppContext.BaseDirectory;
 
 
-context.LoadUnmanagedLibrary(path);
+
+//if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+//    path = Path.Combine(projectRootFolder, "lib",dl);
+//else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+//    path = Path.Combine(projectRootFolder, "lib",so);
+//else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+//    path = Path.Combine(projectRootFolder, "lib",dylib);
+//else
+//    throw new InvalidOperationException("Supported OS Platform not found");
+
+
+//context.LoadUnmanagedLibrary(path);
 
 // Agregar servicios al contenedor.
 builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
