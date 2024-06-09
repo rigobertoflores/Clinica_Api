@@ -23,21 +23,6 @@
     <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     <PackagePath>runtimes\win-x64\native\libwkhtmltox.dll</PackagePath>
   </Content>
-  <Content Include="lib\x64\libwkhtmltox.dylib">
-    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-    <PackagePath>runtimes\osx-x64\native\libwkhtmltox.dylib</PackagePath>
-  </Content>
-  <Content Include="lib\x86\libwkhtmltox.so">
-    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-    <PackagePath>runtimes\linux-x86\native\libwkhtmltox.so</PackagePath>
-  </Content>
-  <Content Include="lib\x64\libwkhtmltox.so">
-    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-    <PackagePath>runtimes\linux-x64\native\libwkhtmltox.so</PackagePath>
-  </Content>
 </ItemGroup>
 
 
