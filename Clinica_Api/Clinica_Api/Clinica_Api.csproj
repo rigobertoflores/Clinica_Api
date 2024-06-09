@@ -9,9 +9,31 @@
   <ItemGroup>
     <Compile Remove="Modelss\DbOliveraClinicaContext.cs" />
   </ItemGroup>
-
+ <ItemGroup>
+    <Content Include="lib\x86\libwkhtmltox.dll" Pack="true" PackagePath="runtimes\win-x86\native">
+      <CopyToPublishDirectory>True</CopyToPublishDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="lib\X64\libwkhtmltox.dll" Pack="true" PackagePath="runtimes\win-x64\native">
+      <CopyToPublishDirectory>True</CopyToPublishDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="lib\X64\libwkhtmltox.dylib" Pack="true" PackagePath="runtimes\osx-x64\native">
+      <CopyToPublishDirectory>True</CopyToPublishDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="lib\X86\libwkhtmltox.so" Pack="true" PackagePath="runtimes\linux-x86\native">
+      <CopyToPublishDirectory>True</CopyToPublishDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="lib\X64\libwkhtmltox.so" Pack="true" PackagePath="runtimes\linux-x64\native">
+      <CopyToPublishDirectory>True</CopyToPublishDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup> 
   <ItemGroup>
     <PackageReference Include="DinkToPdf" Version="1.0.8" />
+    <PackageReference Include="DinkToPdfIncludesDependencies" Version="1.0.8" />
     <PackageReference Include="FreeSpire.PDF" Version="10.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.14" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.14">

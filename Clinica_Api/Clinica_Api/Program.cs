@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Runtime.Loader;
 using DinkToPdf.Contracts;
 using DinkToPdf;
+using System.Runtime.InteropServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +20,38 @@ builder.Services.AddCors(options =>
                             .AllowAnyMethod());
 });
 
+// Construir la ruta absoluta para la biblioteca nativa
+var absolutePath = Path.Combine(AppContext.BaseDirectory, "lib", "libwkhtmltox.dll");
 
+CustomAssemblyLoadContext context = new CustomAssemblyLoadContext();
+
+
+string path;
+string runtimeArchitecture = RuntimeInformation.ProcessArchitecture.ToString().ToLower();
+
+var architectureFolder = (IntPtr.Size == 8) ? "X64\\libwkhtmltox" : "X86\\libwkhtmltox";
+string dl = architectureFolder + ".dll";
+string so = architectureFolder + ".so";
+string dylib = architectureFolder + ".dylib";
+
+
+
+// Construir la ruta absoluta para la biblioteca nativa
+var projectRootFolder = AppContext.BaseDirectory;
+
+
+
+if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+    path = Path.Combine(projectRootFolder, "lib",dl);
+else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+    path = Path.Combine(projectRootFolder, "lib",so);
+else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+    path = Path.Combine(projectRootFolder, "lib",dylib);
+else
+    throw new InvalidOperationException("Supported OS Platform not found");
+
+
+context.LoadUnmanagedLibrary(path);
 
 // Agregar servicios al contenedor.
 builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
@@ -65,3 +97,20 @@ app.UseAuthorization();
 
 app.Run();
 
+public class CustomAssemblyLoadContext : AssemblyLoadContext
+{
+    public IntPtr LoadUnmanagedLibrary(string absolutePath)
+    {
+        return LoadUnmanagedDll(absolutePath);
+    }
+
+    protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
+    {
+        return LoadUnmanagedDllFromPath(unmanagedDllName);
+    }
+
+    protected override Assembly Load(AssemblyName assemblyName)
+    {
+        throw new NotImplementedException();
+    }
+}
