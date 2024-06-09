@@ -3,7 +3,6 @@ using Microsoft.Identity.Web.UI;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
 using Clinica_Api.Modelss;
-using DinkToPdfAll;
 using System.Reflection;
 using System.Runtime.Loader;
 using DinkToPdf.Contracts;
@@ -20,7 +19,7 @@ builder.Services.AddCors(options =>
                             .AllowAnyMethod());
 });
 
-DinkToPdfAll.LibraryLoader.Load();
+
 
 // Agregar servicios al contenedor.
 builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
