@@ -972,11 +972,11 @@ namespace Clinica_Api.Controllers
             try
             {
                 ConfiguracionPrint lista = new ConfiguracionPrint();
-                //lista = _context.ConfiguracionPrints.Where(x => x.Usuario == print.user).FirstOrDefault();
-                //if (lista == null)
-                //{
+                lista = _context.ConfiguracionPrints.Where(x => x.Usuario == print.user).FirstOrDefault();
+                if (lista == null)
+                {
                     lista = new ConfiguracionPrint() { Largo = 135, Ancho = 210, MargenArriba = 30, MargenAbajo = 20, MargenIzquierdo = 20, MargenDerecho = 20, Espacio = 10, Encabezado = " " };
-                //}
+                }
 
                 PechkinPaperSize custompage = new PechkinPaperSize(lista.Ancho.ToString() + "mm", lista.Largo.ToString() + "mm");
 
