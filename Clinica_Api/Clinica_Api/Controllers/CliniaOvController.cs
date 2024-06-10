@@ -12,8 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Spire.Pdf;
 using Spire.Pdf.Graphics;
 using System.Drawing.Imaging;
-using DinkToPdf;
-using DinkToPdf.Contracts;
+using PuppeteerSharp;
 
 namespace Clinica_Api.Controllers
 {
@@ -22,12 +21,10 @@ namespace Clinica_Api.Controllers
     public class CliniaOvController : ControllerBase
     {
         private readonly DbOliveraClinicaContext _context;
-        private readonly IConverter _converter;
 
-        public CliniaOvController(DbOliveraClinicaContext context, IConverter converter)
+        public CliniaOvController(DbOliveraClinicaContext context)
         {
             _context = context;
-            _converter = converter;
         }
 
         [HttpGet("CliniaOvController/MostrarTexto")]
@@ -965,58 +962,83 @@ namespace Clinica_Api.Controllers
         }
 
         [HttpPost("CliniaOvController/Print")]
-        public IActionResult PrintDocument([FromBody] PrintText print)
+        public async Task<IActionResult> PrintDocument([FromBody] PrintText print)
         {
-            byte[] pdf = new byte[1];
+            byte[] pdf;
 
             try
             {
-                ConfiguracionPrint lista = new ConfiguracionPrint();
-                lista = _context.ConfiguracionPrints.Where(x => x.Usuario == print.user).FirstOrDefault();
-                if (lista == null)
-                {
-                    lista = new ConfiguracionPrint() { Largo = 135, Ancho = 210, MargenArriba = 30, MargenAbajo = 20, MargenIzquierdo = 20, MargenDerecho = 20, Espacio = 10, Encabezado = " " };
-                }
+                ConfiguracionPrint lista = _context.ConfiguracionPrints
+                    .Where(x => x.Usuario == print.user)
+                    .FirstOrDefault() ?? new ConfiguracionPrint()
+                    {
+                        Largo = 135,
+                        Ancho = 210,
+                        MargenArriba = 30,
+                        MargenAbajo = 20,
+                        MargenIzquierdo = 20,
+                        MargenDerecho = 20,
+                        Espacio = 10,
+                        Encabezado = " "
+                    };
 
-                PechkinPaperSize custompage = new PechkinPaperSize(lista.Ancho.ToString() + "mm", lista.Largo.ToString() + "mm");
+                var htmlContent = $@"
+                <html>
+                    <head>
+                        <style>
+                            body {{
+                                margin-top: {lista.MargenArriba}px;
+                                margin-bottom: {lista.MargenAbajo}px;
+                                margin-left: {lista.MargenIzquierdo}px;
+                                margin-right: {lista.MargenDerecho}px;
+                            }}
+                            header {{
+                                text-align: center;
+                                font-size: 12px;
+                                margin-bottom: {lista.Espacio}px;
+                            }}
+                        </style>
+                    </head>
+                    <body>
+                        <header>{lista.Encabezado}</header>
+                        {print.text}
+                    </body>
+                </html>";
 
+                var browserFetcher = new BrowserFetcher();
+                await browserFetcher.DownloadAsync();
 
-                var doc = new HtmlToPdfDocument()
+                using var browser = await Puppeteer.LaunchAsync(new LaunchOptions { Headless = true });
+                using var page = await browser.NewPageAsync();
+
+                await page.SetContentAsync(htmlContent);
+
+                var pdfOptions = new PdfOptions
                 {
-                    GlobalSettings = {
-                     PaperSize = custompage,
-                     Margins = new MarginSettings { Top = (double?)lista.MargenArriba, Bottom = (double?)lista.MargenAbajo, Left = (double?)lista.MargenIzquierdo, Right = (double?)lista.MargenDerecho },
-                     DocumentTitle = "Receta",
-                },
-                    Objects = {
-                 new ObjectSettings
-                {
-                 HtmlContent = print.text,
-            WebSettings = { DefaultEncoding = "utf-8" },
-            HeaderSettings = new HeaderSettings
-            {
-                FontSize = 12,
-                Center = lista.Encabezado ,
-                Spacing = (double?)lista.Espacio,
-            }
-                }
-               }
+                    Format = PuppeteerSharp.Media.PaperFormat.A4,
+                    MarginOptions = new PuppeteerSharp.Media.MarginOptions
+                    {
+                        Top = lista.MargenArriba.ToString() + "px",
+                        Bottom = lista.MargenAbajo.ToString() + "px",
+                        Left = lista.MargenIzquierdo.ToString() + "px",
+                        Right = lista.MargenDerecho.ToString() + "px"
+                    }
                 };
 
-                pdf = _converter.Convert(doc);
+                pdf = await page.PdfDataAsync(pdfOptions);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-
+                return StatusCode(500, "Internal server error");
             }
 
             // Devuelve el archivo PDF como un archivo descargable
             return Ok(File(pdf, "application/pdf", "downloaded_file.pdf"));
-
         }
+    
 
-        [HttpPost("CliniaOvController/PostConfiguraImprimir")]
+    [HttpPost("CliniaOvController/PostConfiguraImprimir")]
         public IActionResult ConfiguraImprimir([FromBody] ConfiguracionPrint print)
         {
             List<ConfiguracionPrint> lista = new List<ConfiguracionPrint>();

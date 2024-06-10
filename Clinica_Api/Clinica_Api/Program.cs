@@ -5,8 +5,6 @@ using Microsoft.OpenApi.Models;
 using Clinica_Api.Modelss;
 using System.Reflection;
 using System.Runtime.Loader;
-using DinkToPdf.Contracts;
-using DinkToPdf;
 using System.Runtime.InteropServices;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,35 +17,6 @@ builder.Services.AddCors(options =>
                             .AllowAnyHeader()
                             .AllowAnyMethod());
 });
-
-// Construir la ruta absoluta para la biblioteca nativa
-//var absolutePath = Path.Combine(AppContext.BaseDirectory, "lib", "libwkhtmltox.dll");
-
-//CustomAssemblyLoadContext context = new CustomAssemblyLoadContext();
-
-// Agregar servicios al contenedor.
-builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
-//string path;
-//string runtimeArchitecture = RuntimeInformation.ProcessArchitecture.ToString().ToLower();
-
-//var architectureFolder = (IntPtr.Size == 8) ? "x64" : "x86";
-
-//string projectRootFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-
-
-//if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-//    path = Path.Combine(projectRootFolder, "runtimes\\win-", architectureFolder, "\\native", "libwkhtmltox.dll");
-//else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-//    path = Path.Combine(projectRootFolder, "runtimes\\linux-", runtimeArchitecture, "\\native", "libwkhtmltox.so");
-//else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-//    path = Path.Combine(projectRootFolder, "runtimes\\osx-", runtimeArchitecture, "\\native", "libwkhtmltox.dylib");
-//else
-//    throw new InvalidOperationException("Supported OS Platform not found");
-
-
-//context.LoadUnmanagedLibrary(path);
-
-
 
 
 builder.Services.AddControllers();
