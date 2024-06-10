@@ -5,8 +5,6 @@ using Microsoft.OpenApi.Models;
 using Clinica_Api.Modelss;
 using System.Reflection;
 using System.Runtime.Loader;
-using DinkToPdf.Contracts;
-using DinkToPdf;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,8 +16,6 @@ builder.Services.AddCors(options =>
                             .AllowAnyHeader()
                             .AllowAnyMethod());
 });
-// Agregar servicios al contenedor.
-builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
 
 
 builder.Services.AddControllers();

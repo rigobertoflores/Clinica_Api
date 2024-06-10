@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore;
 using Spire.Pdf;
 using Spire.Pdf.Graphics;
 using System.Drawing.Imaging;
-using DinkToPdf;
-using DinkToPdf.Contracts;
+using PdfSharp.Drawing;
+using PdfSharp.Pdf;
 
 namespace Clinica_Api.Controllers
 {
@@ -22,12 +22,10 @@ namespace Clinica_Api.Controllers
     public class CliniaOvController : ControllerBase
     {
         private readonly DbOliveraClinicaContext _context;
-        private readonly IConverter _converter;
 
-        public CliniaOvController(DbOliveraClinicaContext context, IConverter converter)
+        public CliniaOvController(DbOliveraClinicaContext context)
         {
             _context = context;
-            _converter = converter;
         }
 
         [HttpGet("CliniaOvController/MostrarTexto")]
@@ -967,53 +965,69 @@ namespace Clinica_Api.Controllers
         [HttpPost("CliniaOvController/Print")]
         public IActionResult PrintDocument([FromBody] PrintText print)
         {
-            byte[] pdf = new byte[1];
+            byte[] pdf = null;
 
             try
             {
-                ConfiguracionPrint lista = new ConfiguracionPrint();
-                lista = _context.ConfiguracionPrints.Where(x => x.Usuario == print.user).FirstOrDefault();
-                if (lista == null)
+                ConfiguracionPrint lista = _context.ConfiguracionPrints
+                    .FirstOrDefault(x => x.Usuario == print.user) ??
+                    new ConfiguracionPrint
+                    {
+                        Largo = 135,
+                        Ancho = 210,
+                        MargenArriba = 30,
+                        MargenAbajo = 20,
+                        MargenIzquierdo = 20,
+                        MargenDerecho = 20,
+                        Espacio = 10,
+                        Encabezado = " "
+                    };
+
+                // Crear un nuevo documento PDF
+                PdfSharp.Pdf.PdfDocument document = new PdfSharp.Pdf.PdfDocument();
+                document.Info.Title = "Receta";
+
+                // Crear una nueva página con el tamaño especificado
+                PdfPage page = document.AddPage();
+                page.Width = XUnit.FromMillimeter((double)lista.Ancho);
+                page.Height = XUnit.FromMillimeter((double)lista.Largo);
+                XGraphics gfx = XGraphics.FromPdfPage(page);
+
+                // Configurar márgenes
+                double marginLeft = XUnit.FromMillimeter((double)lista.MargenIzquierdo);
+                double marginTop = XUnit.FromMillimeter((double)lista.MargenArriba);
+                double marginRight = XUnit.FromMillimeter((double)lista.MargenDerecho);
+                double marginBottom = XUnit.FromMillimeter((double)lista.MargenAbajo);
+
+                // Dibujar el encabezado
+                XFont headerFont = new XFont("Arial", 12);
+                gfx.DrawString(lista.Encabezado, headerFont, XBrushes.Black,
+                    new XRect(marginLeft, marginTop - headerFont.Height - (double)lista.Espacio,
+                    page.Width - marginLeft - marginRight, headerFont.Height),
+                    XStringFormats.TopCenter);
+
+                // Dibujar el contenido del cuerpo del documento
+                XFont bodyFont = new XFont("Arial", 12);
+                gfx.DrawString(print.text, bodyFont, XBrushes.Black,
+                    new XRect(marginLeft, marginTop,
+                    page.Width - marginLeft - marginRight,
+                    page.Height - marginTop - marginBottom),
+                    XStringFormats.TopLeft);
+
+                // Guardar el documento en un MemoryStream
+                using (MemoryStream stream = new MemoryStream())
                 {
-                    lista = new ConfiguracionPrint() { Largo = 135, Ancho = 210, MargenArriba = 30, MargenAbajo = 20, MargenIzquierdo = 20, MargenDerecho = 20, Espacio = 10, Encabezado = " " };
+                    document.Save(stream, false);
+                    pdf = stream.ToArray();
                 }
-
-                PechkinPaperSize custompage = new PechkinPaperSize(lista.Ancho.ToString() + "mm", lista.Largo.ToString() + "mm");
-
-
-                var doc = new HtmlToPdfDocument()
-                {
-                    GlobalSettings = {
-                     PaperSize = custompage,
-                     Margins = new MarginSettings { Top = (double?)lista.MargenArriba, Bottom = (double?)lista.MargenAbajo, Left = (double?)lista.MargenIzquierdo, Right = (double?)lista.MargenDerecho },
-                     DocumentTitle = "Receta",
-                },
-                    Objects = {
-                 new ObjectSettings
-                {
-                 HtmlContent = print.text,
-            WebSettings = { DefaultEncoding = "utf-8" },
-            HeaderSettings = new HeaderSettings
-            {
-                FontSize = 12,
-                Center = lista.Encabezado ,
-                Spacing = (double?)lista.Espacio,
-            }
-                }
-               }
-                };
-
-                pdf = _converter.Convert(doc);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-
             }
 
             // Devuelve el archivo PDF como un archivo descargable
             return Ok(File(pdf, "application/pdf", "downloaded_file.pdf"));
-
         }
 
         [HttpPost("CliniaOvController/PostConfiguraImprimir")]
@@ -1069,7 +1083,7 @@ namespace Clinica_Api.Controllers
                     if (extension == ".pdf")
                     {
                         memoryStream.Position = 0;
-                        PdfDocument pdfDocument = new PdfDocument();
+                        Spire.Pdf.PdfDocument pdfDocument = new Spire.Pdf.PdfDocument();
                         pdfDocument.LoadFromStream(memoryStream);
                         int totalPages = pdfDocument.Pages.Count;
                         int pageCount = 0;
