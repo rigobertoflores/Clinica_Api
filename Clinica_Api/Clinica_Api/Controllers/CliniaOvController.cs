@@ -1028,7 +1028,7 @@ namespace Clinica_Api.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, ex.Message);
             }
 
             // Devuelve el archivo PDF como un archivo descargable
