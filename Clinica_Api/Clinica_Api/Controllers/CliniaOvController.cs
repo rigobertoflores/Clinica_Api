@@ -12,7 +12,8 @@ using Microsoft.EntityFrameworkCore;
 using Spire.Pdf;
 using Spire.Pdf.Graphics;
 using System.Drawing.Imaging;
-using SelectPdf;
+using DinkToPdf;
+using DinkToPdf.Contracts;
 
 namespace Clinica_Api.Controllers
 {
@@ -21,10 +22,12 @@ namespace Clinica_Api.Controllers
     public class CliniaOvController : ControllerBase
     {
         private readonly DbOliveraClinicaContext _context;
+        private readonly IConverter _converter;
 
-        public CliniaOvController(DbOliveraClinicaContext context)
+        public CliniaOvController(DbOliveraClinicaContext context, IConverter converter)
         {
             _context = context;
+            _converter = converter;
         }
 
         [HttpGet("CliniaOvController/MostrarTexto")]
@@ -968,82 +971,49 @@ namespace Clinica_Api.Controllers
 
             try
             {
-                ConfiguracionPrint lista = _context.ConfiguracionPrints
-                .Where(x => x.Usuario == print.user)
-                .FirstOrDefault() ?? new ConfiguracionPrint()
+                ConfiguracionPrint lista = new ConfiguracionPrint();
+                lista = _context.ConfiguracionPrints.Where(x => x.Usuario == print.user).FirstOrDefault();
+                if (lista == null)
                 {
-                    Largo = 135,
-                    Ancho = 210,
-                    MargenArriba = 30,
-                    MargenAbajo = 20,
-                    MargenIzquierdo = 20,
-                    MargenDerecho = 20,
-                    Espacio = 10,
-                    Encabezado = " "
-                };
-                var htmlContent = $@"
-                <html>
-                    <head>
-                        <style>
-                            body {{
-                                margin-top: {lista.MargenArriba}px;
-                                margin-bottom: {lista.MargenAbajo}px;
-                                margin-left: {lista.MargenIzquierdo}px;
-                                margin-right: {lista.MargenDerecho}px;
-                            }}
-                            header {{
-                                text-align: center;
-                                font-size: 12px;
-                                margin-bottom: {lista.Espacio}px;
-                            }}
-                        </style>
-                    </head>
-                    <body>
-                        <header>{lista.Encabezado}</header>
-                        {print.text}
-                    </body>
-                </html>";
-                // Crear un nuevo convertidor de HTML a PDF
-                HtmlToPdf converter = new HtmlToPdf();
-                converter.Options.PdfPageSize = SelectPdf.PdfPageSize.A4;
-                converter.Options.MarginTop = lista.MargenArriba.HasValue ? (int)lista.MargenArriba.Value : 0;
-                converter.Options.MarginBottom = lista.MargenAbajo.HasValue ? (int)lista.MargenAbajo.Value : 0;
-                converter.Options.MarginLeft = lista.MargenIzquierdo.HasValue ? (int)lista.MargenIzquierdo.Value : 0;
-                converter.Options.MarginRight = lista.MargenDerecho.HasValue ? (int)lista.MargenDerecho.Value : 0;
-                converter.Options.DisplayHeader = true;
-                converter.Header.DisplayOnFirstPage = true;
-                converter.Header.DisplayOnOddPages = true;
-                converter.Header.DisplayOnEvenPages = true;
-                converter.Header.Height = lista.Espacio.HasValue ? (int)lista.Espacio.Value : 0;
-
-                PdfTextSection headerText = new PdfTextSection(0, 0, lista.Encabezado, new System.Drawing.Font("Arial", 12))
-                {
-                    HorizontalAlign = PdfTextHorizontalAlign.Center
-                };
-                converter.Header.Add(headerText);
-                converter.Options.MinPageLoadTime = 2;
-                converter.Options.MaxPageLoadTime = 60;
-
-                // Convertir HTML a PDF
-                SelectPdf.PdfDocument doc = converter.ConvertHtmlString(htmlContent);
-
-                // Guardar el documento PDF en un array de bytes
-                using (var ms = new MemoryStream())
-                {
-                    doc.Save(ms);
-                    pdf = ms.ToArray();
+                    lista = new ConfiguracionPrint() { Largo = 135, Ancho = 210, MargenArriba = 30, MargenAbajo = 20, MargenIzquierdo = 20, MargenDerecho = 20, Espacio = 10, Encabezado = " " };
                 }
 
-                doc.Close();
+                PechkinPaperSize custompage = new PechkinPaperSize(lista.Ancho.ToString() + "mm", lista.Largo.ToString() + "mm");
+
+
+                var doc = new HtmlToPdfDocument()
+                {
+                    GlobalSettings = {
+                     PaperSize = custompage,
+                     Margins = new MarginSettings { Top = (double?)lista.MargenArriba, Bottom = (double?)lista.MargenAbajo, Left = (double?)lista.MargenIzquierdo, Right = (double?)lista.MargenDerecho },
+                     DocumentTitle = "Receta",
+                },
+                    Objects = {
+                 new ObjectSettings
+                {
+                 HtmlContent = print.text,
+            WebSettings = { DefaultEncoding = "utf-8" },
+            HeaderSettings = new HeaderSettings
+            {
+                FontSize = 12,
+                Center = lista.Encabezado ,
+                Spacing = (double?)lista.Espacio,
+            }
+                }
+               }
+                };
+
+                pdf = _converter.Convert(doc);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return StatusCode(500, ex.Message);
+
             }
 
             // Devuelve el archivo PDF como un archivo descargable
             return Ok(File(pdf, "application/pdf", "downloaded_file.pdf"));
+
         }
 
         [HttpPost("CliniaOvController/PostConfiguraImprimir")]
@@ -1099,7 +1069,7 @@ namespace Clinica_Api.Controllers
                     if (extension == ".pdf")
                     {
                         memoryStream.Position = 0;
-                        Spire.Pdf.PdfDocument pdfDocument = new Spire.Pdf.PdfDocument();
+                        PdfDocument pdfDocument = new PdfDocument();
                         pdfDocument.LoadFromStream(memoryStream);
                         int totalPages = pdfDocument.Pages.Count;
                         int pageCount = 0;
