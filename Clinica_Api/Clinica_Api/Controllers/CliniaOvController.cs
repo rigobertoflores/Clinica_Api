@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Spire.Pdf;
 using Spire.Pdf.Graphics;
 using System.Drawing.Imaging;
-using PuppeteerSharp;
+using SelectPdf;
 
 namespace Clinica_Api.Controllers
 {
@@ -962,24 +962,25 @@ namespace Clinica_Api.Controllers
         }
 
         [HttpPost("CliniaOvController/Print")]
-        public async Task<IActionResult> PrintDocument([FromBody] PrintText print)
+        public IActionResult PrintDocument([FromBody] PrintText print)
         {
-            byte[] pdf;
+            byte[] pdf = new byte[1];
 
             try
             {
-                ConfiguracionPrint lista = new ConfiguracionPrint()
-                    {
-                        Largo = 135,
-                        Ancho = 210,
-                        MargenArriba = 30,
-                        MargenAbajo = 20,
-                        MargenIzquierdo = 20,
-                        MargenDerecho = 20,
-                        Espacio = 10,
-                        Encabezado = " "
-                    };
-
+                ConfiguracionPrint lista = _context.ConfiguracionPrints
+                .Where(x => x.Usuario == print.user)
+                .FirstOrDefault() ?? new ConfiguracionPrint()
+                {
+                    Largo = 135,
+                    Ancho = 210,
+                    MargenArriba = 30,
+                    MargenAbajo = 20,
+                    MargenIzquierdo = 20,
+                    MargenDerecho = 20,
+                    Espacio = 10,
+                    Encabezado = " "
+                };
                 var htmlContent = $@"
                 <html>
                     <head>
@@ -1002,28 +1003,35 @@ namespace Clinica_Api.Controllers
                         {print.text}
                     </body>
                 </html>";
-
-                var browserFetcher = new BrowserFetcher();
-                await browserFetcher.DownloadAsync();
-
-                using var browser = await Puppeteer.LaunchAsync(new LaunchOptions { Headless = true });
-                using var page = await browser.NewPageAsync();
-
-                await page.SetContentAsync(htmlContent);
-
-                var pdfOptions = new PdfOptions
+                // Crear un nuevo convertidor de HTML a PDF
+                HtmlToPdf converter = new HtmlToPdf();
+                converter.Options.PdfPageSize = SelectPdf.PdfPageSize.A4;
+                converter.Options.MarginTop = lista.MargenArriba.HasValue ? (int)lista.MargenArriba.Value : 0;
+                converter.Options.MarginBottom = lista.MargenAbajo.HasValue ? (int)lista.MargenAbajo.Value : 0;
+                converter.Options.MarginLeft = lista.MargenIzquierdo.HasValue ? (int)lista.MargenIzquierdo.Value : 0;
+                converter.Options.MarginRight = lista.MargenDerecho.HasValue ? (int)lista.MargenDerecho.Value : 0;
+                converter.Options.DisplayHeader = true;
+                converter.Header.DisplayOnFirstPage = true;
+                converter.Header.DisplayOnOddPages = true;
+                converter.Header.DisplayOnEvenPages = true;
+                converter.Header.Height = lista.Espacio.HasValue ? (int)lista.Espacio.Value : 0; ;
+                PdfTextSection headerText = new PdfTextSection(0, 0, lista.Encabezado, new System.Drawing.Font("Arial", 12))
                 {
-                    Format = PuppeteerSharp.Media.PaperFormat.A4,
-                    MarginOptions = new PuppeteerSharp.Media.MarginOptions
-                    {
-                        Top = lista.MargenArriba.ToString() + "px",
-                        Bottom = lista.MargenAbajo.ToString() + "px",
-                        Left = lista.MargenIzquierdo.ToString() + "px",
-                        Right = lista.MargenDerecho.ToString() + "px"
-                    }
+                    HorizontalAlign = PdfTextHorizontalAlign.Center
                 };
+                converter.Header.Add(headerText);
 
-                pdf = await page.PdfDataAsync(pdfOptions);
+                // Convertir HTML a PDF
+                SelectPdf.PdfDocument doc = converter.ConvertHtmlString(htmlContent);
+
+                // Guardar el documento PDF en un array de bytes
+                using (var ms = new MemoryStream())
+                {
+                    doc.Save(ms);
+                    pdf = ms.ToArray();
+                }
+
+                doc.Close();
             }
             catch (Exception ex)
             {
@@ -1034,9 +1042,8 @@ namespace Clinica_Api.Controllers
             // Devuelve el archivo PDF como un archivo descargable
             return Ok(File(pdf, "application/pdf", "downloaded_file.pdf"));
         }
-    
 
-    [HttpPost("CliniaOvController/PostConfiguraImprimir")]
+        [HttpPost("CliniaOvController/PostConfiguraImprimir")]
         public IActionResult ConfiguraImprimir([FromBody] ConfiguracionPrint print)
         {
             List<ConfiguracionPrint> lista = new List<ConfiguracionPrint>();
@@ -1089,7 +1096,7 @@ namespace Clinica_Api.Controllers
                     if (extension == ".pdf")
                     {
                         memoryStream.Position = 0;
-                        PdfDocument pdfDocument = new PdfDocument();
+                        Spire.Pdf.PdfDocument pdfDocument = new Spire.Pdf.PdfDocument();
                         pdfDocument.LoadFromStream(memoryStream);
                         int totalPages = pdfDocument.Pages.Count;
                         int pageCount = 0;
