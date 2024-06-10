@@ -1014,12 +1014,15 @@ namespace Clinica_Api.Controllers
                 converter.Header.DisplayOnFirstPage = true;
                 converter.Header.DisplayOnOddPages = true;
                 converter.Header.DisplayOnEvenPages = true;
-                converter.Header.Height = lista.Espacio.HasValue ? (int)lista.Espacio.Value : 0; ;
+                converter.Header.Height = lista.Espacio.HasValue ? (int)lista.Espacio.Value : 0;
+
                 PdfTextSection headerText = new PdfTextSection(0, 0, lista.Encabezado, new System.Drawing.Font("Arial", 12))
                 {
                     HorizontalAlign = PdfTextHorizontalAlign.Center
                 };
                 converter.Header.Add(headerText);
+                converter.Options.MinPageLoadTime = 2;
+                converter.Options.MaxPageLoadTime = 60;
 
                 // Convertir HTML a PDF
                 SelectPdf.PdfDocument doc = converter.ConvertHtmlString(htmlContent);
