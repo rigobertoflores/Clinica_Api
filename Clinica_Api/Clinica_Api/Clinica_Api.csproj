@@ -5,15 +5,21 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
 	  <IsPackable>true</IsPackable>
-	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Remove="Modelss\DbOliveraClinicaContext.cs" />
   </ItemGroup>
 
+<!-- <ItemGroup>
+  <EmbeddedResource Include="Rotativa\Windows\wkhtmltopdf.exe">
+    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+  </EmbeddedResource>
+</ItemGroup> -->
+
   <ItemGroup>
     <PackageReference Include="FreeSpire.PDF" Version="10.2.0" />
+    <PackageReference Include="HtmlToPdfConverter.Core_CrossOsPaths" Version="2.1.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.14" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.14">
       <PrivateAssets>all</PrivateAssets>
@@ -26,7 +32,6 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Identity.Web" Version="2.18.1" />
     <PackageReference Include="Microsoft.Identity.Web.UI" Version="2.18.1" />
-    <PackageReference Include="Select.HtmlToPdf.NetCore" Version="24.1.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="System.Drawing.Common" Version="8.0.4" />
   </ItemGroup>

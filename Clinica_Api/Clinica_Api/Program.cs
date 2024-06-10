@@ -5,7 +5,8 @@ using Microsoft.OpenApi.Models;
 using Clinica_Api.Modelss;
 using System.Reflection;
 using System.Runtime.Loader;
-using System.Runtime.InteropServices;
+using DinkToPdf.Contracts;
+using DinkToPdf;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,10 +14,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
-        builder => builder.WithOrigins("http://localhost:4200","https://white-rock-00c5c0110.5.azurestaticapps.net") // Cambia esto por la URL de tu aplicación Angular si es diferente
+        builder => builder.WithOrigins("http://localhost:4200", "https://white-rock-00c5c0110.5.azurestaticapps.net") // Cambia esto por la URL de tu aplicación Angular si es diferente
                             .AllowAnyHeader()
                             .AllowAnyMethod());
 });
+// Agregar servicios al contenedor.
+builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
 
 
 builder.Services.AddControllers();
@@ -42,9 +45,9 @@ var app = builder.Build();
 app.UseCors("AllowSpecificOrigin");
 // Configure the HTTP request pipeline.
 
-    app.UseDeveloperExceptionPage();
-    app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API v1"));
+app.UseDeveloperExceptionPage();
+app.UseSwagger();
+app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API v1"));
 
 
 app.UseHttpsRedirection();
@@ -59,20 +62,3 @@ app.UseAuthorization();
 
 app.Run();
 
-public class CustomAssemblyLoadContext : AssemblyLoadContext
-{
-    public IntPtr LoadUnmanagedLibrary(string absolutePath)
-    {
-        return LoadUnmanagedDll(absolutePath);
-    }
-
-    protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
-    {
-        return LoadUnmanagedDllFromPath(unmanagedDllName);
-    }
-
-    protected override Assembly Load(AssemblyName assemblyName)
-    {
-        throw new NotImplementedException();
-    }
-}
