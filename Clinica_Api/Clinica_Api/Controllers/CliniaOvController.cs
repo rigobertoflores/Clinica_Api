@@ -968,9 +968,7 @@ namespace Clinica_Api.Controllers
 
             try
             {
-                ConfiguracionPrint lista = _context.ConfiguracionPrints
-                    .Where(x => x.Usuario == print.user)
-                    .FirstOrDefault() ?? new ConfiguracionPrint()
+                ConfiguracionPrint lista = new ConfiguracionPrint()
                     {
                         Largo = 135,
                         Ancho = 210,
