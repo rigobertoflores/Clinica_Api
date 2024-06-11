@@ -14,6 +14,8 @@ using Spire.Pdf.Graphics;
 using System.Drawing.Imaging;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
+using System.Text.RegularExpressions;
+using PdfSharp.Drawing.Layout;
 
 namespace Clinica_Api.Controllers
 {
@@ -969,6 +971,7 @@ namespace Clinica_Api.Controllers
 
             try
             {
+                var textoModificado = AjustarTexto(print.text);
                 ConfiguracionPrint lista = _context.ConfiguracionPrints
                     .FirstOrDefault(x => x.Usuario == print.user) ??
                     new ConfiguracionPrint
@@ -1006,13 +1009,11 @@ namespace Clinica_Api.Controllers
                     page.Width - marginLeft - marginRight, headerFont.Height),
                     XStringFormats.TopCenter);
 
-                // Dibujar el contenido del cuerpo del documento
+                // Dibujar el contenido del cuerpo del documento utilizando XTextFormatter
                 XFont bodyFont = new XFont("Arial", 12);
-                gfx.DrawString(print.text, bodyFont, XBrushes.Black,
-                    new XRect(marginLeft, marginTop,
-                    page.Width - marginLeft - marginRight,
-                    page.Height - marginTop - marginBottom),
-                    XStringFormats.TopLeft);
+                XTextFormatter tf = new XTextFormatter(gfx);
+                XRect rect = new XRect(marginLeft, marginTop, page.Width - marginLeft - marginRight, page.Height - marginTop - marginBottom);
+                tf.DrawString(textoModificado, bodyFont, XBrushes.Black, rect, XStringFormats.TopLeft);
 
                 // Guardar el documento en un MemoryStream
                 using (MemoryStream stream = new MemoryStream())
@@ -1029,7 +1030,7 @@ namespace Clinica_Api.Controllers
             // Devuelve el archivo PDF como un archivo descargable
             return Ok(File(pdf, "application/pdf", "downloaded_file.pdf"));
         }
-
+        
         [HttpPost("CliniaOvController/PostConfiguraImprimir")]
         public IActionResult ConfiguraImprimir([FromBody] ConfiguracionPrint print)
         {
@@ -1087,7 +1088,7 @@ namespace Clinica_Api.Controllers
                         pdfDocument.LoadFromStream(memoryStream);
                         int totalPages = pdfDocument.Pages.Count;
                         int pageCount = 0;
-                        
+
                         for (int i = 0; i < totalPages && pageCount < 2; i++)
                         {
                             var pageImageStream = new MemoryStream();
@@ -1096,7 +1097,7 @@ namespace Clinica_Api.Controllers
                             {
                                 image.Save(pageImageStream, ImageFormat.Jpeg);
                             }
-                             
+
                             pageImageStream.Position = 0;
 
                             var documentosubir = new Complementario
@@ -1212,5 +1213,15 @@ namespace Clinica_Api.Controllers
             return Ok(pacientes);
         }
 
+
+        private static string AjustarTexto(string textoConHTML)
+        {
+            //string textoAjustado = textoConHTML.Replace("<p>", string.Empty); 
+            string plainText = Regex.Replace(textoConHTML, "<.*?>", string.Empty);
+
+            // Reemplazar los caracteres \n con saltos de línea
+            plainText = plainText.Replace("\n", Environment.NewLine);
+            return plainText.ToString();
+        }
     }
 }
