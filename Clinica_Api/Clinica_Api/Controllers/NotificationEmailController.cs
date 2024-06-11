@@ -166,8 +166,8 @@ namespace Clinica_Api.Controllers
             return Ok(relacionAgregadas);
         }
 
-        [HttpDelete("NotificationEmailController/EliminarVinculoPlantillasPacientes/{id:int}")]
-        public IActionResult EliminarVinculoPP([FromQuery(Name = "id")] int[] ids)
+        [HttpPost("NotificationEmailController/EliminarVinculoPlantillasPacientes")]
+        public IActionResult EliminarVinculoPP([FromBody] List<RelacionPlantilllaPaciente> listDesvincular)
         {
             //[FromBody] List<RelacionPlantilllaPaciente> listDesvincular,
             try
@@ -179,16 +179,16 @@ namespace Clinica_Api.Controllers
                     return NotFound();
                 }
 
-                //if (listDesvincular != null && listDesvincular.Any() && context.Any())
-                //{
-                //    listDesvincular.ForEach(vinculo =>
-                //    {
-                //        var relacionAEliminar = context.Where(x => x.PlantillaId == vinculo.PlantillaId
-                //        && x.PacienteId == vinculo.PacienteId).First();
+                if (listDesvincular != null && listDesvincular.Any() && context.Any())
+                {
+                    listDesvincular.ForEach(vinculo =>
+                    {
+                        var relacionAEliminar = context.Where(x => x.PlantillaId == vinculo.PlantillaId
+                        && x.PacienteId == vinculo.PacienteId).First();
 
-                //        _context.Remove(relacionAEliminar);
-                //    });
-                //}
+                        _context.RelacionPlantilllaPacientes.Remove(relacionAEliminar);
+                    });
+                }
 
                 _context.SaveChanges();
 
@@ -199,7 +199,7 @@ namespace Clinica_Api.Controllers
                 return StatusCode(500, "No se pudo guardar la información del paciente. Error: " + ex.Message);
             }
 
-            return Ok("Correo enviado con exito");
+            return Ok();
         }
 
         #endregion
@@ -213,14 +213,14 @@ namespace Clinica_Api.Controllers
             var pacientesANotificar = ObtenerPacientesPorFecha(fecha);
             var plantilla = parametros.plantilla;
             var pacientePlantilla = _context.RelacionPlantilllaPacientes.ToList();
-            var correosEnviados =  new List<RelacionPlantilllaPaciente>();
+            var correosEnviados = new List<RelacionPlantilllaPaciente>();
             var hoy = DateTime.Now.ToString("yyyy-MM-dd");
-           
+
             try
             {
                 var cantCorreosEnviados = pacientePlantilla.Where(correos => correos.Status == StatusCorreo.enviado.GetHashCode().ToString() &&
                 Convert.ToDateTime(correos.FechaUltActualizacion).ToString("yyyy-MM-dd") == hoy).ToList();
-                if (pacientesANotificar.Count() >= 100 || cantCorreosEnviados.Count()>=100)
+                if (pacientesANotificar.Count() >= 100 || cantCorreosEnviados.Count() >= 100)
                 {
                     return Ok("El maximo de correos a enviar en un dia es 100");
                 }
@@ -256,13 +256,13 @@ namespace Clinica_Api.Controllers
                         });
                     }
                 });
-                
+
             }
-            catch (Exception ex )
+            catch (Exception ex)
             {
                 throw new Exception(ex.ToString());
             }
-            
+
             return Ok(correosEnviados);
         }
 
@@ -281,7 +281,7 @@ namespace Clinica_Api.Controllers
 
                 MailMessage mailMessage = new MailMessage();
                 mailMessage.From = new MailAddress(emailOrigen, "AMECAE");
-                mailMessage.To.Add(new MailAddress(emailDestino, "Yo"));
+                mailMessage.To.Add(new MailAddress(emailDestino, emailDestino));
                 mailMessage.Body = correoTexto;
                 mailMessage.IsBodyHtml = true;
                 mailMessage.Subject = asunto;
@@ -331,9 +331,9 @@ namespace Clinica_Api.Controllers
         {
             var listRelaciones = new List<RelacionPlantilllaPaciente>();
             try
-            {              
-                listRelaciones = _context.RelacionPlantilllaPacientes.ToList(); 
-               
+            {
+                listRelaciones = _context.RelacionPlantilllaPacientes.ToList();
+
             }
             catch (Exception ex)
             {
