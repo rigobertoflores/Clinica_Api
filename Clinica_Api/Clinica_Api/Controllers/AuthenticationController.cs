@@ -99,7 +99,8 @@ namespace Clinica_Api.Controllers
                 "droriololivera@gmail.com",
                 "carla.olivera1994@gmail.com",
                 "rigobertofdq@gmail.com",
-                "katherineluaces92@gmail.com"
+                "katherineluaces92@gmail.com",
+                "gine.carlaolivera@gmail.com",
             };
             var userConPermiso = usersPermitidos.Contains(email);
             return Ok(userConPermiso);

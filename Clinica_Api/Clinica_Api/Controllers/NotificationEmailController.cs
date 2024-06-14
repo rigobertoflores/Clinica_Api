@@ -98,12 +98,26 @@ namespace Clinica_Api.Controllers
         public IActionResult PacientesVinculados(int? idPlantilla)
         {
             var listRelaciones = new List<RelacionPlantilllaPaciente>();
+            var listPacientesVinculados = new List<PacientesVinculados>();
             try
             {
                 var plantilllaPacientes = _context.RelacionPlantilllaPacientes.ToList();
                 if (idPlantilla != null)
                 {
                     listRelaciones = plantilllaPacientes.Where(pp => pp.PlantillaId == idPlantilla).ToList();
+                    listPacientesVinculados.AddRange(listRelaciones.Select(pacientes =>
+                       new PacientesVinculados()
+                       {
+                           NombrePlantilla = pacientes.NombrePlantilla,
+                           NombrePaciente = pacientes.NombrePaciente,
+                           Email = _context.PacientesInformacionGenerals.ToList().Where(p => p.Id == pacientes.PacienteId).First().Email,
+                           PlantillaId = pacientes.PlantillaId,
+                           PacienteId = pacientes.PacienteId,
+                           Status = pacientes.Status,
+                           FechaCreacion = pacientes.FechaCreacion,
+                           FechaUltActualizacion = pacientes.FechaUltActualizacion,
+                           Id = pacientes.Id
+                       }));
                 }
                 else
                 {
@@ -117,7 +131,7 @@ namespace Clinica_Api.Controllers
                 return StatusCode(500, "No se pudo guardar la información del paciente. Error: " + ex.Message);
             }
 
-            return Ok(listRelaciones);
+            return Ok(listPacientesVinculados);
         }
 
         [HttpPost("NotificationEmailController/AgregarVinculoPlantillasPacientes")]
@@ -266,6 +280,65 @@ namespace Clinica_Api.Controllers
             return Ok(correosEnviados);
         }
 
+        [HttpPost("NotificationEmailController/SendEmailFelicitaciones")]
+        public IActionResult SendEmailFelicitaciones([FromBody] Plantillas plantilla)
+        {
+
+            var pacientePlantilla = _context.RelacionPlantilllaPacientes.ToList();
+            var pacientes = _context.PacientesInformacionGenerals.ToList();
+            var listaPacientesId = new List<int>();
+            var lsPacientesXPlantilla = new List<RelacionPlantilllaPaciente>();
+            var pacientesANotificar = new List<string>();
+            var correosEnviados = new List<RelacionPlantilllaPaciente>();
+            var hoy = DateTime.Now.ToString("yyyy-MM-dd");
+            try
+            {
+                if (plantilla != null) {
+                    lsPacientesXPlantilla = pacientePlantilla.Where(pp => pp.PlantillaId == plantilla.Id).ToList();
+                    listaPacientesId = pacientePlantilla.Where(pp => pp.PlantillaId == plantilla.Id).Select(x => x.PacienteId).ToList();
+                }
+                   
+                if (listaPacientesId.Any())
+                {
+                    listaPacientesId.ForEach(id =>
+                    {
+                        pacientesANotificar.Add(pacientes.Where(p => p.Id == id).First().Email);
+                    });
+                }
+
+                var cantCorreosEnviados = pacientePlantilla.Where(correos => correos.Status == StatusCorreo.enviado.GetHashCode().ToString() &&
+                                Convert.ToDateTime(correos.FechaUltActualizacion).ToString("yyyy-MM-dd") == hoy).ToList();
+                if (pacientesANotificar.Count() >= 100 || cantCorreosEnviados.Count() >= 100)
+                {
+                    return Ok("El maximo de correos a enviar en un dia es 100");
+                }
+
+                pacientesANotificar.ForEach(p =>
+                {
+                    if (p != null && plantilla?.CuerpoEmail != null)
+                    {
+                        EnviarCorreo(plantilla?.Asunto, plantilla.CuerpoEmail, p);
+
+                        //Actualizar status de correos enviados
+                        lsPacientesXPlantilla.ForEach(p => 
+                        {
+                            p.Status = StatusCorreo.enviado.GetHashCode().ToString();
+                            p.FechaUltActualizacion = DateTime.Now;
+                        });
+                        _context.RelacionPlantilllaPacientes.UpdateRange(lsPacientesXPlantilla);
+                        _context.SaveChanges();
+                        
+                    }
+                });
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+
+            return Ok(lsPacientesXPlantilla);
+        }
 
         private int EnviarCorreo(string asunto, string correoTexto, string emailDestino)
         {
@@ -370,4 +443,25 @@ public class PacientesCitas
     public string? Email { get; set; }
     public DateTime? FechaConsulta { get; set; }
     public string? Nombre { get; set; }
+}
+
+public partial class PacientesVinculados
+{
+    public int Id { get; set; }
+
+    public int PlantillaId { get; set; }
+
+    public int PacienteId { get; set; }
+
+    public string Status { get; set; } = null!;
+
+    public DateTime? FechaUltActualizacion { get; set; }
+
+    public DateTime? FechaCreacion { get; set; }
+
+    public string? NombrePlantilla { get; set; }
+
+    public string? Email { get; set; }
+    public string? NombrePaciente { get; set; }
+
 }

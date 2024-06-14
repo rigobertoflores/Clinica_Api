@@ -52,13 +52,13 @@ namespace Clinica_Api.Controllers
             try
             {
                 var contenido = _context.PacientesInformacionGenerals.OrderBy(x => x.FechaConsulta)
-      .Select(x => new
-      {
-          x.FechaConsulta,
-          x.Nombre,
-          x.Sexo,
-          x.Clave
-      });
+                  .Select(x => new
+                  {
+                      x.FechaConsulta,
+                      x.Nombre,
+                      x.Sexo,
+                      x.Clave
+                  });
                 return Ok(contenido);
             }
             catch (Exception ex)
@@ -89,7 +89,11 @@ namespace Clinica_Api.Controllers
             x.FechaConsulta,
             x.Nombre,
             x.Sexo,
-            x.Clave
+            x.Clave,
+            x.FechaDeNacimiento,
+            x.FechaUltimaConsulta,
+            x.Email,
+            x.Telefono
         });
                 return Ok(new
                 {
@@ -1030,7 +1034,7 @@ namespace Clinica_Api.Controllers
             // Devuelve el archivo PDF como un archivo descargable
             return Ok(File(pdf, "application/pdf", "downloaded_file.pdf"));
         }
-        
+
         [HttpPost("CliniaOvController/PostConfiguraImprimir")]
         public IActionResult ConfiguraImprimir([FromBody] ConfiguracionPrint print)
         {
