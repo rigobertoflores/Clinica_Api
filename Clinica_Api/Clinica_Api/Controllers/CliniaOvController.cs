@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+锘縰sing Microsoft.AspNetCore.Mvc;
 using System;
 using static System.Net.Mime.MediaTypeNames;
 using System.Drawing;
@@ -16,6 +16,10 @@ using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 using System.Text.RegularExpressions;
 using PdfSharp.Drawing.Layout;
+using MigraDoc.DocumentObjectModel;
+using MigraDoc.Rendering;
+using System.Diagnostics;
+using PdfSharp;
 
 namespace Clinica_Api.Controllers
 {
@@ -42,7 +46,7 @@ namespace Clinica_Api.Controllers
             catch (Exception ex)
             {
                 // Maneja cualquier error que pueda ocurrir durante el guardado.
-                return StatusCode(500, "No se pudo guardar la informaci髇 del paciente. Error: " + ex.Message);
+                return StatusCode(500, "No se pudo guardar la informaci贸n del paciente. Error: " + ex.Message);
             }
         }
 
@@ -64,7 +68,7 @@ namespace Clinica_Api.Controllers
             catch (Exception ex)
             {
                 // Maneja cualquier error que pueda ocurrir durante el guardado.
-                return StatusCode(500, "No se pudo guardar la informaci髇 del paciente. Error: " + ex.Message);
+                return StatusCode(500, "No se pudo guardar la informaci贸n del paciente. Error: " + ex.Message);
             }
         }
 
@@ -104,7 +108,7 @@ namespace Clinica_Api.Controllers
             catch (Exception ex)
             {
                 // Maneja cualquier error que pueda ocurrir durante el guardado.
-                return StatusCode(500, "No se pudo obtener la informaci髇 del paciente. Error: " + ex.Message);
+                return StatusCode(500, "No se pudo obtener la informaci贸n del paciente. Error: " + ex.Message);
             }
         }
 
@@ -133,7 +137,7 @@ namespace Clinica_Api.Controllers
             catch (Exception ex)
             {
                 // Maneja cualquier error que pueda ocurrir durante el guardado.
-                return StatusCode(500, "No se pudo guardar la informaci髇 del paciente. Error: " + ex.Message);
+                return StatusCode(500, "No se pudo guardar la informaci贸n del paciente. Error: " + ex.Message);
             }
         }
 
@@ -148,7 +152,7 @@ namespace Clinica_Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "No seconsultar la informaci髇 del paciente. Error: " + ex.Message);
+                return StatusCode(500, "No seconsultar la informaci贸n del paciente. Error: " + ex.Message);
             }
         }
         private Object getPacienteId(int id)
@@ -375,7 +379,7 @@ namespace Clinica_Api.Controllers
             catch (Exception ex)
             {
                 // Maneja cualquier error que pueda ocurrir durante el guardado.
-                return StatusCode(500, "No se pudo guardar la informaci髇 del paciente. Error: " + ex.Message);
+                return StatusCode(500, "No se pudo guardar la informaci贸n del paciente. Error: " + ex.Message);
             }
 
             return Ok(getPacienteId(clave));
@@ -403,7 +407,7 @@ namespace Clinica_Api.Controllers
             catch (Exception ex)
             {
                 // Maneja cualquier error que pueda ocurrir durante el guardado.
-                return StatusCode(500, "No se pudo guardar la informaci髇 del paciente. Error: " + ex.Message);
+                return StatusCode(500, "No se pudo guardar la informaci贸n del paciente. Error: " + ex.Message);
             }
 
             return Ok(recetasxpaciente);
@@ -429,7 +433,7 @@ namespace Clinica_Api.Controllers
             catch (Exception ex)
             {
                 // Maneja cualquier error que pueda ocurrir durante el guardado.
-                return StatusCode(500, "No se pudo guardar la informaci髇 del paciente. Error: " + ex.Message);
+                return StatusCode(500, "No se pudo guardar la informaci贸n del paciente. Error: " + ex.Message);
             }
 
             return Ok(recetasxpaciente);
@@ -446,7 +450,7 @@ namespace Clinica_Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "No se pudo obtener la informaci髇 del paciente. Error: " + ex.Message);
+                return StatusCode(500, "No se pudo obtener la informaci贸n del paciente. Error: " + ex.Message);
             }
 
             return Ok(recetasxpaciente);
@@ -474,7 +478,7 @@ namespace Clinica_Api.Controllers
             catch (Exception ex)
             {
                 // Maneja cualquier error que pueda ocurrir durante el guardado.
-                return StatusCode(500, "No se pudo guardar la informaci髇 del paciente. Error: " + ex.Message);
+                return StatusCode(500, "No se pudo guardar la informaci贸n del paciente. Error: " + ex.Message);
             }
 
             return Ok(historias);
@@ -499,7 +503,7 @@ namespace Clinica_Api.Controllers
             catch (Exception ex)
             {
                 // Maneja cualquier error que pueda ocurrir durante el guardado.
-                return StatusCode(500, "No se pudo guardar la informaci髇 del paciente. Error: " + ex.Message);
+                return StatusCode(500, "No se pudo guardar la informaci贸n del paciente. Error: " + ex.Message);
             }
 
             return Ok(recetasxpaciente);
@@ -515,7 +519,7 @@ namespace Clinica_Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "No se pudo guardar la informaci髇 del paciente. Error: " + ex.Message);
+                return StatusCode(500, "No se pudo guardar la informaci贸n del paciente. Error: " + ex.Message);
             }
             return Ok(historias);
         }
@@ -542,7 +546,7 @@ namespace Clinica_Api.Controllers
             catch (Exception ex)
             {
                 // Maneja cualquier error que pueda ocurrir durante el guardado.
-                return StatusCode(500, "No se pudo guardar la informaci髇 del paciente. Error: " + ex.Message);
+                return StatusCode(500, "No se pudo guardar la informaci贸n del paciente. Error: " + ex.Message);
             }
 
             return Ok(expedienteresult);
@@ -567,7 +571,7 @@ namespace Clinica_Api.Controllers
             catch (Exception ex)
             {
                 // Maneja cualquier error que pueda ocurrir durante el guardado.
-                return StatusCode(500, "No se pudo guardar la informaci髇 del paciente. Error: " + ex.Message);
+                return StatusCode(500, "No se pudo guardar la informaci贸n del paciente. Error: " + ex.Message);
             }
 
             return Ok(expedienteresult);
@@ -584,7 +588,7 @@ namespace Clinica_Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "No se pudo obtener la informaci髇 del paciente. Error: " + ex.Message);
+                return StatusCode(500, "No se pudo obtener la informaci贸n del paciente. Error: " + ex.Message);
             }
 
             return Ok(expediente);
@@ -680,7 +684,7 @@ namespace Clinica_Api.Controllers
             catch (Exception ex)
             {
                 // Maneja cualquier error que pueda ocurrir durante el guardado.
-                return StatusCode(500, "No se pudo guardar la informaci髇 del paciente. Error: " + ex.Message);
+                return StatusCode(500, "No se pudo guardar la informaci贸n del paciente. Error: " + ex.Message);
             }
 
             return Ok(notasxpaciente);
@@ -706,7 +710,7 @@ namespace Clinica_Api.Controllers
             catch (Exception ex)
             {
                 // Maneja cualquier error que pueda ocurrir durante el guardado.
-                return StatusCode(500, "No se pudo guardar la informaci髇 del paciente. Error: " + ex.Message);
+                return StatusCode(500, "No se pudo guardar la informaci贸n del paciente. Error: " + ex.Message);
             }
 
             return Ok(notasxpaciente);
@@ -723,7 +727,7 @@ namespace Clinica_Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "No se pudo obtener la informaci髇 del paciente. Error: " + ex.Message);
+                return StatusCode(500, "No se pudo obtener la informaci贸n del paciente. Error: " + ex.Message);
             }
 
             return Ok(notas);
@@ -739,7 +743,7 @@ namespace Clinica_Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "No se pudo guardar la informaci髇 del paciente. Error: " + ex.Message);
+                return StatusCode(500, "No se pudo guardar la informaci贸n del paciente. Error: " + ex.Message);
             }
             return Ok(historias);
         }
@@ -766,7 +770,7 @@ namespace Clinica_Api.Controllers
             catch (Exception ex)
             {
                 // Maneja cualquier error que pueda ocurrir durante el guardado.
-                return StatusCode(500, "No se pudo guardar la informaci髇 del paciente. Error: " + ex.Message);
+                return StatusCode(500, "No se pudo guardar la informaci贸n del paciente. Error: " + ex.Message);
             }
 
             return Ok(informes);
@@ -791,7 +795,7 @@ namespace Clinica_Api.Controllers
             catch (Exception ex)
             {
                 // Maneja cualquier error que pueda ocurrir durante el guardado.
-                return StatusCode(500, "No se pudo guardar la informaci髇 del paciente. Error: " + ex.Message);
+                return StatusCode(500, "No se pudo guardar la informaci贸n del paciente. Error: " + ex.Message);
             }
 
             return Ok(informes);
@@ -808,7 +812,7 @@ namespace Clinica_Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "No se pudo obtener la informaci髇 del paciente. Error: " + ex.Message);
+                return StatusCode(500, "No se pudo obtener la informaci贸n del paciente. Error: " + ex.Message);
             }
 
             return Ok(informeexpediente);
@@ -834,7 +838,7 @@ namespace Clinica_Api.Controllers
             catch (Exception ex)
             {
                 // Maneja cualquier error que pueda ocurrir durante el guardado.
-                return StatusCode(500, "No se pudo guardar la informaci髇 del paciente. Error: " + ex.Message);
+                return StatusCode(500, "No se pudo guardar la informaci贸n del paciente. Error: " + ex.Message);
             }
 
             return Ok(expediente);
@@ -859,7 +863,7 @@ namespace Clinica_Api.Controllers
             catch (Exception ex)
             {
                 // Maneja cualquier error que pueda ocurrir durante el guardado.
-                return StatusCode(500, "No se pudo guardar la informaci髇 del paciente. Error: " + ex.Message);
+                return StatusCode(500, "No se pudo guardar la informaci贸n del paciente. Error: " + ex.Message);
             }
 
             return Ok(expedienteresult);
@@ -990,39 +994,52 @@ namespace Clinica_Api.Controllers
                         Encabezado = " "
                     };
 
-                // Crear un nuevo documento PDF
-                PdfSharp.Pdf.PdfDocument document = new PdfSharp.Pdf.PdfDocument();
-                document.Info.Title = "Receta";
+        Document doc = new Document();
+                Section section = doc.AddSection();
 
-                // Crear una nueva p醙ina con el tama駉 especificado
-                PdfPage page = document.AddPage();
-                page.Width = XUnit.FromMillimeter((double)lista.Ancho);
-                page.Height = XUnit.FromMillimeter((double)lista.Largo);
-                XGraphics gfx = XGraphics.FromPdfPage(page);
+                // Configurar el documento en modo apaisado (landscape) si el ancho es mayor que el largo
+                if (lista.Ancho > lista.Largo)
+                {
+                    section.PageSetup.Orientation = Orientation.Landscape;
+                    section.PageSetup.PageWidth = Unit.FromMillimeter((double)lista.Largo);
+                    section.PageSetup.PageHeight = Unit.FromMillimeter((double)lista.Ancho);
+                }
+                else
+                {
+                    section.PageSetup.PageWidth = Unit.FromMillimeter((double)lista.Ancho);
+                    section.PageSetup.PageHeight = Unit.FromMillimeter((double)lista.Largo);
+                }
 
-                // Configurar m醨genes
-                double marginLeft = XUnit.FromMillimeter((double)lista.MargenIzquierdo);
-                double marginTop = XUnit.FromMillimeter((double)lista.MargenArriba);
-                double marginRight = XUnit.FromMillimeter((double)lista.MargenDerecho);
-                double marginBottom = XUnit.FromMillimeter((double)lista.MargenAbajo);
+                section.PageSetup.TopMargin = Unit.FromMillimeter((double)lista.MargenArriba);
+                section.PageSetup.BottomMargin = Unit.FromMillimeter((double)lista.MargenAbajo);
+                section.PageSetup.LeftMargin = Unit.FromMillimeter((double)lista.MargenIzquierdo);
+                section.PageSetup.RightMargin = Unit.FromMillimeter((double)lista.MargenDerecho);
 
-                // Dibujar el encabezado
-                XFont headerFont = new XFont("Arial", 12);
-                gfx.DrawString(lista.Encabezado, headerFont, XBrushes.Black,
-                    new XRect(marginLeft, marginTop - headerFont.Height - (double)lista.Espacio,
-                    page.Width - marginLeft - marginRight, headerFont.Height),
-                    XStringFormats.TopCenter);
+                // Agregar el encabezado
+                Paragraph header = section.Headers.Primary.AddParagraph();
+                header.AddText(lista.Encabezado);
+                header.Format.Font = new MigraDoc.DocumentObjectModel.Font("Arial", 10);
+                header.Format.Alignment = ParagraphAlignment.Center;
+                header.Format.SpaceAfter = Unit.FromMillimeter((double)lista.Espacio);
 
-                // Dibujar el contenido del cuerpo del documento utilizando XTextFormatter
-                XFont bodyFont = new XFont("Arial", 12);
-                XTextFormatter tf = new XTextFormatter(gfx);
-                XRect rect = new XRect(marginLeft, marginTop, page.Width - marginLeft - marginRight, page.Height - marginTop - marginBottom);
-                tf.DrawString(textoModificado, bodyFont, XBrushes.Black, rect, XStringFormats.TopLeft);
+                // Agregar el texto del cuerpo
+                Paragraph para = section.AddParagraph();
+                para.Format.Alignment = ParagraphAlignment.Justify;
+                para.Format.Font.Name = "Arial";
+                para.Format.Font.Size = 8;
+                para.AddText(textoModificado);
 
-                // Guardar el documento en un MemoryStream
+                // Renderizar el documento en un archivo PDF
+                PdfDocumentRenderer pdfRenderer = new PdfDocumentRenderer(true)
+                {
+                    Document = doc
+                };
+                pdfRenderer.RenderDocument();
+
+                // Guardar el PDF en un MemoryStream
                 using (MemoryStream stream = new MemoryStream())
                 {
-                    document.Save(stream, false);
+                    pdfRenderer.Save(stream, false);
                     pdf = stream.ToArray();
                 }
             }
@@ -1034,6 +1051,7 @@ namespace Clinica_Api.Controllers
             // Devuelve el archivo PDF como un archivo descargable
             return Ok(File(pdf, "application/pdf", "downloaded_file.pdf"));
         }
+
 
         [HttpPost("CliniaOvController/PostConfiguraImprimir")]
         public IActionResult ConfiguraImprimir([FromBody] ConfiguracionPrint print)
@@ -1055,7 +1073,7 @@ namespace Clinica_Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "No se pudo guardar la informaci髇 del paciente. Error: " + ex.Message);
+                return StatusCode(500, "No se pudo guardar la informaci贸n del paciente. Error: " + ex.Message);
             }
 
             return Ok(lista);
@@ -1212,7 +1230,7 @@ namespace Clinica_Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "No se pudo obtener la informaci髇 de la cita del paciente. Error: " + ex.Message);
+                return StatusCode(500, "No se pudo obtener la informaci贸n de la cita del paciente. Error: " + ex.Message);
             }
             return Ok(pacientes);
         }
@@ -1223,9 +1241,51 @@ namespace Clinica_Api.Controllers
             //string textoAjustado = textoConHTML.Replace("<p>", string.Empty); 
             string plainText = Regex.Replace(textoConHTML, "<.*?>", string.Empty);
 
-            // Reemplazar los caracteres \n con saltos de l韓ea
+            // Reemplazar los caracteres \n con saltos de l铆nea
             plainText = plainText.Replace("\n", Environment.NewLine);
             return plainText.ToString();
+        }
+    }
+    public class LayoutHelper
+    {
+        private readonly PdfSharp.Pdf.PdfDocument _document;
+        private readonly XUnit _topPosition;
+        private readonly XUnit _bottomMargin;
+        private XUnit _currentPosition;
+
+        public LayoutHelper(PdfSharp.Pdf.PdfDocument document, XUnit topPosition, XUnit bottomMargin)
+        {
+            _document = document;
+            _topPosition = topPosition;
+            _bottomMargin = bottomMargin;
+            // Set a value outside the page - a new page will be created on the first request.
+            _currentPosition = bottomMargin + 10000;
+        }
+
+        public XUnit GetLinePosition(XUnit requestedHeight)
+        {
+            return GetLinePosition(requestedHeight, -1f);
+        }
+
+        public XUnit GetLinePosition(XUnit requestedHeight, XUnit requiredHeight)
+        {
+            XUnit required = requiredHeight == -1f ? requestedHeight : requiredHeight;
+            if (_currentPosition + required > _bottomMargin)
+                CreatePage();
+            XUnit result = _currentPosition;
+            _currentPosition += requestedHeight;
+            return result;
+        }
+
+        public XGraphics Gfx { get; private set; }
+        public PdfPage Page { get; private set; }
+
+        void CreatePage()
+        {
+            Page = _document.AddPage();
+            Page.Size = PageSize.A4;
+            Gfx = XGraphics.FromPdfPage(Page);
+            _currentPosition = _topPosition;
         }
     }
 }
