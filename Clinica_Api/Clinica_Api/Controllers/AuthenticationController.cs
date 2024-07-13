@@ -97,6 +97,7 @@ namespace Clinica_Api.Controllers
         {
             var usersPermitidos = new List<string>(){
                 "droriololivera@gmail.com",
+                "droriololiverarodriguez@gmail.com",
                 "carla.olivera1994@gmail.com",
                 "rigobertofdq@gmail.com",
                 "katherineluaces92@gmail.com",
