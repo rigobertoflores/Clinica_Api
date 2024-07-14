@@ -994,13 +994,13 @@ namespace Clinica_Api.Controllers
                         Encabezado = " "
                     };
 
-        Document doc = new Document();
+                  Document doc = new Document();
                 Section section = doc.AddSection();
 
                 // Configurar el documento en modo apaisado (landscape) si el ancho es mayor que el largo
                 if (lista.Ancho > lista.Largo)
                 {
-                    section.PageSetup.Orientation = Orientation.Landscape;
+                    section.PageSetup.Orientation = Orientation.Portrait;
                     section.PageSetup.PageWidth = Unit.FromMillimeter((double)lista.Largo);
                     section.PageSetup.PageHeight = Unit.FromMillimeter((double)lista.Ancho);
                 }
