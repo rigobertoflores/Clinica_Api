@@ -984,10 +984,10 @@ namespace Clinica_Api.Controllers
                     .FirstOrDefault(x => x.Usuario == print.user) ??
                     new ConfiguracionPrint
                     {
-                        Largo = 135,
+                        Largo = 279,
                         Ancho = 210,
-                        MargenArriba = 30,
-                        MargenAbajo = 20,
+                        MargenArriba = 40,
+                        MargenAbajo = 170,
                         MargenIzquierdo = 20,
                         MargenDerecho = 20,
                         Espacio = 10,
@@ -997,18 +997,11 @@ namespace Clinica_Api.Controllers
                   Document doc = new Document();
                 Section section = doc.AddSection();
 
-                // Configurar el documento en modo apaisado (landscape) si el ancho es mayor que el largo
-                if (lista.Ancho > lista.Largo)
-                {
-                    section.PageSetup.Orientation = Orientation.Landscape;
-                    section.PageSetup.PageWidth = Unit.FromMillimeter((double)lista.Largo);
-                    section.PageSetup.PageHeight = Unit.FromMillimeter((double)lista.Ancho);
-                }
-                else
-                {
-                    section.PageSetup.PageWidth = Unit.FromMillimeter((double)lista.Ancho);
-                    section.PageSetup.PageHeight = Unit.FromMillimeter((double)lista.Largo);
-                }
+               
+                  
+                section.PageSetup.PageWidth = Unit.FromMillimeter((double)lista.Ancho);
+                section.PageSetup.PageHeight = Unit.FromMillimeter((double)lista.Largo);
+                section.PageSetup.Orientation = Orientation.Portrait;
 
                 section.PageSetup.TopMargin = Unit.FromMillimeter((double)lista.MargenArriba);
                 section.PageSetup.BottomMargin = Unit.FromMillimeter((double)lista.MargenAbajo);
