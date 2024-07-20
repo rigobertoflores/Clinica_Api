@@ -1017,7 +1017,6 @@ namespace Clinica_Api.Controllers
 
                 // Agregar el texto del cuerpo
                 Paragraph para = section.AddParagraph();
-                para.Format.Alignment = ParagraphAlignment.Justify;
                 para.Format.Font.Name = "Arial";
                 para.Format.Font.Size = 8;
                 para.AddText(textoModificado);
@@ -1231,12 +1230,22 @@ namespace Clinica_Api.Controllers
 
         private static string AjustarTexto(string textoConHTML)
         {
-            //string textoAjustado = textoConHTML.Replace("<p>", string.Empty); 
-            string plainText = Regex.Replace(textoConHTML, "<.*?>", string.Empty);
+            // Eliminar etiquetas HTML
+    string plainText = Regex.Replace(textoConHTML, "<.*?>", string.Empty);
 
-            // Reemplazar los caracteres \n con saltos de línea
-            plainText = plainText.Replace("\n", Environment.NewLine);
-            return plainText.ToString();
+    // Reemplazar caracteres HTML específicos
+    plainText = plainText.Replace("&nbsp;", " ");
+
+    // Reemplazar los caracteres \n con saltos de línea
+    plainText = plainText.Replace("\n", Environment.NewLine);
+    
+    // Reemplazar secuencias de espacios en blanco múltiples con un solo espacio
+    plainText = Regex.Replace(plainText, @"\s+", " ");
+
+    // Restaurar los saltos de línea dobles para mantener los párrafos separados
+    plainText = Regex.Replace(plainText, @"\s*([.!?])\s*", "$1" + Environment.NewLine + Environment.NewLine);
+
+    return plainText;
         }
     }
     public class LayoutHelper
