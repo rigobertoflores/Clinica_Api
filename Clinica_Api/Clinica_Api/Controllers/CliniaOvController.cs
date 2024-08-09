@@ -1010,7 +1010,7 @@ namespace Clinica_Api.Controllers
 
                 // Agregar el encabezado
                 Paragraph header = section.Headers.Primary.AddParagraph();
-                header.AddText(lista.Encabezado +"\n"+"\n"+print.nombrePaciente +"fecha:" + DateTime.Now.ToString("d"));
+                header.AddText(lista.Encabezado +"\n"+"\n"+print.nombrePaciente + "                      \t\t\t\tfecha:" + DateTime.Now.ToString("d"));
                 header.Format.Font = new MigraDoc.DocumentObjectModel.Font("Courier", 11);
                 header.Format.Alignment = ParagraphAlignment.Center;
                 header.Format.SpaceAfter = Unit.FromMillimeter((double)lista.Espacio);
