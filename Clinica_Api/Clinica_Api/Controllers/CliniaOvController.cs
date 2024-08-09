@@ -994,11 +994,11 @@ namespace Clinica_Api.Controllers
                         Encabezado = " "
                     };
 
-                  Document doc = new Document();
+                Document doc = new Document();
                 Section section = doc.AddSection();
 
-               
-                  
+
+
                 section.PageSetup.PageWidth = Unit.FromMillimeter((double)lista.Ancho);
                 section.PageSetup.PageHeight = Unit.FromMillimeter((double)lista.Largo);
                 section.PageSetup.Orientation = Orientation.Portrait;
@@ -1010,15 +1010,15 @@ namespace Clinica_Api.Controllers
 
                 // Agregar el encabezado
                 Paragraph header = section.Headers.Primary.AddParagraph();
-                header.AddText(lista.Encabezado);
-                header.Format.Font = new MigraDoc.DocumentObjectModel.Font("Arial", 10);
+                header.AddText(lista.Encabezado +"\n"+"\n"+print.nombrePaciente +"fecha:" + DateTime.Now.ToString("d"));
+                header.Format.Font = new MigraDoc.DocumentObjectModel.Font("Courier", 11);
                 header.Format.Alignment = ParagraphAlignment.Center;
                 header.Format.SpaceAfter = Unit.FromMillimeter((double)lista.Espacio);
 
                 // Agregar el texto del cuerpo
                 Paragraph para = section.AddParagraph();
-                para.Format.Font.Name = "Arial";
-                para.Format.Font.Size = 8;
+                para.Format.Font.Name = "Courier";
+                para.Format.Font.Size = 11;
                 para.AddText(textoModificado);
 
                 // Renderizar el documento en un archivo PDF
@@ -1227,25 +1227,64 @@ namespace Clinica_Api.Controllers
             return Ok(pacientes);
         }
 
+        [HttpDelete("CliniaOvController/DeleteExpedientes/{id:int}")]
+        public IActionResult DeleteExpedientes([FromRoute] int id)
+        {            
+            using (var context = _context)
+            {
+                var p_pacientes = _context.PacientesInformacionGenerals.Where(x => x.Clave == id);
+                var p_imagenes = _context.Imagenes.Where(x => x.Id == id);
+                var p_receta = getAllRecetasPaciente(id);
+                var p_notas = getAllNotasPaciente(id);
+                var p_fotos = _context.Fotos.Where(x => x.Id == id);
+                var p_expedientes = _context.Expedientes.Where(x => x.Id == id);
+                var p_iexpedientes = _context.InformeExpedientes.Where(x => x.Id == id);
+                var p_complementarios = _context.Complementarios.Where(x => x.Id == id);
+
+                // Eliminar pacientes
+                context.PacientesInformacionGenerals.RemoveRange(p_pacientes);
+
+                // Eliminar imágenes
+                context.Imagenes.RemoveRange(p_imagenes);
+
+                // Eliminar recetas (asumiendo que getAllRecetasPaciente(id) devuelve una colección)
+                context.RecetasxPacientes.RemoveRange(p_receta);
+
+                // Eliminar notas (asumiendo que getAllNotasPaciente(id) devuelve una colección)
+                context.Notas.RemoveRange(p_notas);
+
+                // Eliminar fotos
+                context.Fotos.RemoveRange(p_fotos);
+
+                // Eliminar expedientes
+                context.Expedientes.RemoveRange(p_expedientes);
+
+                // Eliminar informes de expedientes
+                context.InformeExpedientes.RemoveRange(p_iexpedientes);
+
+                // Eliminar estudios complementarios
+                context.Complementarios.RemoveRange(p_complementarios);
+
+                // Guardar los cambios en la base de datos
+                context.SaveChanges();
+            }
+
+
+            return Ok(id);
+        }
+
 
         private static string AjustarTexto(string textoConHTML)
         {
-            // Eliminar etiquetas HTML
-    string plainText = Regex.Replace(textoConHTML, "<.*?>", string.Empty);
+            // Convertir secuencias <p><br> a saltos de línea
+            string textoAjustado = Regex.Replace(textoConHTML, "<br>", Environment.NewLine);
+            textoAjustado = Regex.Replace(textoConHTML, "<p>", Environment.NewLine);
+            // Eliminar todas las demás etiquetas HTML
+            textoAjustado = Regex.Replace(textoAjustado, "<.*?>", string.Empty);
 
-    // Reemplazar caracteres HTML específicos
-    plainText = plainText.Replace("&nbsp;", " ");
-
-    // Reemplazar los caracteres \n con saltos de línea
-    plainText = plainText.Replace("\n", Environment.NewLine);
-    
-    // Reemplazar secuencias de espacios en blanco múltiples con un solo espacio
-    plainText = Regex.Replace(plainText, @"\s+", " ");
-
-    // Restaurar los saltos de línea dobles para mantener los párrafos separados
-    plainText = Regex.Replace(plainText, @"\s*([.!?])\s*", "$1" + Environment.NewLine + Environment.NewLine);
-
-    return plainText;
+            // Reemplazar caracteres HTML específicos
+            textoAjustado = textoAjustado.Replace("&nbsp;", " ");
+            return textoAjustado;
         }
     }
     public class LayoutHelper
