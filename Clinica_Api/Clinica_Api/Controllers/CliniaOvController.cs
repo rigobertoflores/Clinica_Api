@@ -1010,7 +1010,9 @@ namespace Clinica_Api.Controllers
 
                 // Agregar el encabezado
                 Paragraph header = section.Headers.Primary.AddParagraph();
-                header.AddText(lista.Encabezado +"\n"+"\n"+print.nombrePaciente + "                      \t\t\t\tfecha:" + DateTime.Now.ToString("d"));
+                header.AddFormattedText(lista.Encabezado + "\n" + "\n", TextFormat.Bold);
+                header.AddFormattedText(print.nombrePaciente, TextFormat.Bold);
+                header.AddFormattedText("                      \t\t\t\tfecha:" + DateTime.Now.ToString("d"), TextFormat.Bold);
                 header.Format.Font = new MigraDoc.DocumentObjectModel.Font("Courier", 11);
                 header.Format.Alignment = ParagraphAlignment.Center;
                 header.Format.SpaceAfter = Unit.FromMillimeter((double)lista.Espacio);
@@ -1019,7 +1021,7 @@ namespace Clinica_Api.Controllers
                 Paragraph para = section.AddParagraph();
                 para.Format.Font.Name = "Courier";
                 para.Format.Font.Size = 11;
-                para.AddText(textoModificado);
+                para.AddFormattedText(textoModificado, TextFormat.Bold);
 
                 // Renderizar el documento en un archivo PDF
                 PdfDocumentRenderer pdfRenderer = new PdfDocumentRenderer(true)
@@ -1284,7 +1286,7 @@ namespace Clinica_Api.Controllers
             textoAjustado = Regex.Replace(textoAjustado, "<.*?>", string.Empty);
 
             // Reemplazar caracteres HTML específicos
-            textoAjustado = textoAjustado.Replace("&nbsp;", " ");
+            textoAjustado = textoAjustado.Replace("&nbsp;", "<br>");
             return textoAjustado;
         }
     }
