@@ -1277,8 +1277,9 @@ namespace Clinica_Api.Controllers
         private static string AjustarTexto(string textoConHTML)
         {
             // Convertir secuencias <p><br> a saltos de línea
-            string textoAjustado = Regex.Replace(textoConHTML, "<br>", Environment.NewLine);
-            textoAjustado = Regex.Replace(textoConHTML, "<p>", Environment.NewLine);
+            string textoAjustado = Regex.Replace(textoConHTML, "<p>", Environment.NewLine);
+             textoAjustado = Regex.Replace(textoConHTML, "<br>", Environment.NewLine);
+            
             // Eliminar todas las demás etiquetas HTML
             textoAjustado = Regex.Replace(textoAjustado, "<.*?>", string.Empty);
 
