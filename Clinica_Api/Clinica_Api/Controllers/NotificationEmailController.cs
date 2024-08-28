@@ -347,8 +347,10 @@ namespace Clinica_Api.Controllers
 #if DEBUG
                 emailDestino = "developertestkat@gmail.com";
 #endif
-                string emailOrigen = "developertestkat@gmail.com";
-                string pass = "susouzafsrjtkcnw";
+                //string emailOrigen = "developertestkat@gmail.com";
+                //string pass = "susouzafsrjtkcnw"; 
+                string emailOrigen = "gineamecae@gmail.com";
+                string pass = "oggv jjdt ggej huud";
 
                 //string correoTexto = "este es un correo de prueba";
 
