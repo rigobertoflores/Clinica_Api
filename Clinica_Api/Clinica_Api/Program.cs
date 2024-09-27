@@ -1,5 +1,8 @@
 using Clinica_Api.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Web.UI;
+using Microsoft.Identity.Web;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,10 +24,15 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Agrega servicios al contenedor.
-builder.Services.AddDbContext<DbOliveraContext>(options =>
+builder.Services.AddDbContext<DbOliveraClinicaContext>(options =>
     options.UseSqlServer("Data Source=LAPTOP-UB7952GK\\MSSQLSERVER01;Integrated Security=True;Connect Timeout=300;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False"));
 
 builder.Services.AddControllers();
+
+// Agregar servicios al contenedor. K
+builder.Services.AddMicrosoftIdentityWebAppAuthentication(builder.Configuration, "AzureAd");
+builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages().AddMicrosoftIdentityUI();
 
 var app = builder.Build();
 app.UseCors("AllowSpecificOrigin");
@@ -41,5 +49,9 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseAuthentication();
+
+app.UseAuthorization();
 
 app.Run();

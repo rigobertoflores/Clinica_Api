@@ -65,9 +65,21 @@
               "target": "Package",
               "version": "[7.0.14, )"
             },
+            "Microsoft.Identity.Web": {
+              "target": "Package",
+              "version": "[2.17.0, )"
+            },
+            "Microsoft.Identity.Web.UI": {
+              "target": "Package",
+              "version": "[2.17.0, )"
+            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.5.0, )"
+            },
+            "System.Drawing.Common": {
+              "target": "Package",
+              "version": "[8.0.2, )"
             }
           },
           "imports": [

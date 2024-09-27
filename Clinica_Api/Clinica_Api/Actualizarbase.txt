@@ -1,0 +1,3 @@
+Scaffold-DbContext "Data Source=LAPTOP-UB7952GK\MSSQLSERVER01;Integrated Security=True;Connect Timeout=300;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Database=db_olivera_clinica;Trusted_Connection=True;" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Modelss -Force
+
+ Scaffold-DbContext "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=master;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False;Database=db_olivera_clinica;Trusted_Connection=True;" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Modelss -Force
