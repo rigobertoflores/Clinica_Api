@@ -1223,6 +1223,28 @@ namespace Clinica_Api.Controllers
             }
             return Ok(historiasall);
         }
+
+        [HttpPost("CliniaOvController/DeleteInforme")]
+        public IActionResult DeleteInforme([FromBody] InformeOperatorio informe)
+        {
+            List<InformeOperatorio> informeall = null;
+            try
+            {
+                InformeOperatorio info = _context.InformeOperatorios.Where(inf => inf.Id == informe.Id).First();
+
+                if (info.Id != null)
+                {
+                    _context.Remove(info);
+                    _context.SaveChanges();
+                }
+                informeall = _context.InformeOperatorios.ToList();
+            }
+            catch (Exception ex)
+            {
+                return Ok(informeall);
+            }
+            return Ok(informeall);
+        }
         private static byte[] HexStringToByteArray(string hex)
         {
             int NumberChars = hex.Length;
