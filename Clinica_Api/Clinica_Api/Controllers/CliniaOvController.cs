@@ -1201,6 +1201,28 @@ namespace Clinica_Api.Controllers
             }
             return Ok(blobData);
         }
+
+        [HttpPost("CliniaOvController/DeleteHistoria")]
+        public IActionResult DeleteHistoria([FromBody] Historia historia)
+        {
+            List<Historia> historiasall = null;
+            try
+            {
+                Historia his = _context.Historias.Where(his => his.Id == historia.Id).First();
+
+                if (his.Id != null)
+                {
+                    _context.Remove(his);
+                    _context.SaveChanges();
+                }
+                historiasall = _context.Historias.ToList();
+            }
+            catch (Exception ex)
+            {
+                return Ok(historiasall);
+            }
+            return Ok(historiasall);
+        }
         private static byte[] HexStringToByteArray(string hex)
         {
             int NumberChars = hex.Length;
