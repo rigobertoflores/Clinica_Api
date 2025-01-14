@@ -43,6 +43,8 @@ public partial class DbOliveraClinicaContext : DbContext
 
     public virtual DbSet<InformeOperatorio> InformeOperatorios { get; set; }
 
+    public virtual DbSet<Justificacion> Justificacions { get; set; }
+
     public virtual DbSet<Nota> Notas { get; set; }
 
     public virtual DbSet<Observacione> Observaciones { get; set; }
@@ -50,6 +52,8 @@ public partial class DbOliveraClinicaContext : DbContext
     public virtual DbSet<PacientesInformacionGeneral> PacientesInformacionGenerals { get; set; }
 
     public virtual DbSet<Plantilla> Plantillas { get; set; }
+
+    public virtual DbSet<PlantillaJustificacion> PlantillaJustificacions { get; set; }
 
     public virtual DbSet<Query> Queries { get; set; }
 
@@ -69,7 +73,9 @@ public partial class DbOliveraClinicaContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-      => optionsBuilder.UseSqlServer("Server=tcp:server-sql-rk.database.windows.net,1433;Initial Catalog=AMECAE-SQL-DataBase;Persist Security Info=False;User ID=rigobertofdq;Password=Hildacanada20181..;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
+       => optionsBuilder.UseSqlServer("Server=tcp:server-sql-rk.database.windows.net,1433;Initial Catalog=AMECAE-SQL-DataBase;Persist Security Info=False;User ID=rigobertofdq;Password=Hildacanada20181..;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
+
+        //=> optionsBuilder.UseSqlServer("Data Source=LAPTOP-UB7952GK\\MSSQLSERVER01;Integrated Security=True;Connect Timeout=300;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Database=db_olivera_clinica;Trusted_Connection=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -240,15 +246,13 @@ public partial class DbOliveraClinicaContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK_LasFotos_LasFotos");
 
             entity.Property(e => e.Id)
+                .ValueGeneratedNever()
                 .HasColumnName("ID");
         });
 
         modelBuilder.Entity<Historia>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK_Historias_Historias");
-
-            entity.Property(e => e.Id)
-                .HasColumnName("ID");
+            entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.Hc).HasColumnName("HC");
             entity.Property(e => e.Nombre).HasMaxLength(50);
         });
@@ -275,6 +279,16 @@ public partial class DbOliveraClinicaContext : DbContext
         modelBuilder.Entity<InformeOperatorio>(entity =>
         {
             entity.ToTable("Informe_Operatorio");
+
+            entity.Property(e => e.Usuario).HasColumnName("usuario");
+        });
+
+        modelBuilder.Entity<Justificacion>(entity =>
+        {
+            entity.ToTable("Justificacion");
+
+            entity.Property(e => e.Justificacion1).HasColumnName("Justificacion");
+            entity.Property(e => e.JustificacionId).HasMaxLength(9);
         });
 
         modelBuilder.Entity<Nota>(entity =>
@@ -311,6 +325,9 @@ public partial class DbOliveraClinicaContext : DbContext
             entity.Property(e => e.Bronconeumonia).HasMaxLength(255);
             entity.Property(e => e.Bronquitis).HasMaxLength(255);
             entity.Property(e => e.Cancer).HasMaxLength(255);
+            entity.Property(e => e.CardiopatiaFamiliar)
+                .HasMaxLength(255)
+                .IsFixedLength();
             entity.Property(e => e.Cardiopatias).HasMaxLength(255);
             entity.Property(e => e.Citomegalovirus).HasMaxLength(255);
             entity.Property(e => e.Clamydiasis).HasMaxLength(255);
@@ -330,6 +347,9 @@ public partial class DbOliveraClinicaContext : DbContext
             entity.Property(e => e.Email).HasMaxLength(255);
             entity.Property(e => e.EnfermedadesGeneticas).HasMaxLength(255);
             entity.Property(e => e.EstadoCivil).HasMaxLength(255);
+            entity.Property(e => e.FechaActualizacion)
+                .HasColumnType("date")
+                .HasColumnName("fecha_actualizacion");
             entity.Property(e => e.FechaConsulta)
                 .HasColumnType("date")
                 .HasColumnName("fecha_consulta");
@@ -342,6 +362,9 @@ public partial class DbOliveraClinicaContext : DbContext
             entity.Property(e => e.HepatitisViralTipo).HasMaxLength(255);
             entity.Property(e => e.Herpes).HasMaxLength(255);
             entity.Property(e => e.Hipertension).HasMaxLength(255);
+            entity.Property(e => e.HipertensionFamiliar)
+                .HasMaxLength(255)
+                .IsFixedLength();
             entity.Property(e => e.Hiv)
                 .HasMaxLength(255)
                 .HasColumnName("HIV");
@@ -354,6 +377,7 @@ public partial class DbOliveraClinicaContext : DbContext
             entity.Property(e => e.Ocupacion).HasMaxLength(255);
             entity.Property(e => e.OcupacionEsposo).HasMaxLength(255);
             entity.Property(e => e.OtraEnfermedad).HasMaxLength(255);
+            entity.Property(e => e.OtraEnfermedadPersonal).HasMaxLength(1000);
             entity.Property(e => e.OtrasEndocrinas).HasMaxLength(255);
             entity.Property(e => e.Parasitosis).HasMaxLength(255);
             entity.Property(e => e.Poblacion).HasMaxLength(255);
@@ -384,6 +408,13 @@ public partial class DbOliveraClinicaContext : DbContext
             entity.Property(e => e.Nombre)
                 .HasMaxLength(250)
                 .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<PlantillaJustificacion>(entity =>
+        {
+            entity.ToTable("Plantilla_Justificacion");
+
+            entity.Property(e => e.Usuario).HasColumnName("usuario");
         });
 
         modelBuilder.Entity<Query>(entity =>
@@ -473,10 +504,13 @@ public partial class DbOliveraClinicaContext : DbContext
         modelBuilder.Entity<TratamientosEnfermedade>(entity =>
         {
             entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.FechaActualizacion).HasColumnType("date");
+            entity.Property(e => e.FechaCreacion).HasColumnType("date");
             entity.Property(e => e.Nombre)
                 .HasMaxLength(300)
                 .IsUnicode(false);
             entity.Property(e => e.PalabrasClaves).HasMaxLength(250);
+            entity.Property(e => e.Usuario).HasColumnName("usuario");
         });
 
         OnModelCreatingPartial(modelBuilder);

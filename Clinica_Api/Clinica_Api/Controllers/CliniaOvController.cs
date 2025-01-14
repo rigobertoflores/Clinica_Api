@@ -21,6 +21,7 @@ using MigraDoc.Rendering;
 using System.Diagnostics;
 using PdfSharp;
 using Clinica_Api.ClassModels;
+using System.Text.Json;
 
 namespace Clinica_Api.Controllers
 {
@@ -166,7 +167,8 @@ namespace Clinica_Api.Controllers
             {
                 var fechaConsultaFormatted = FormatDateToDDMMYYYY(contenido.FechaConsulta);
                 var fechaUltimaConsultaFormatted = FormatDateToDDMMYYYY(contenido.FechaUltimaConsulta);
-
+                var HipertensionFamiliar = contenido.HipertensionFamiliar != null ? contenido.HipertensionFamiliar.Trim() : string.Empty;
+                var CardiopatiaFamiliar = contenido.CardiopatiaFamiliar != null ? contenido.CardiopatiaFamiliar.Trim() : string.Empty;
                 var result = new
                 {
                     contenido.Clave,
@@ -221,8 +223,12 @@ namespace Clinica_Api.Controllers
                     contenido.Displasias,
                     contenido.Alergia,
                     contenido.Nombre,
+                    HipertensionFamiliar,
+                    CardiopatiaFamiliar,
+                    contenido.OtraEnfermedadPersonal,
                     FechaConsulta = fechaConsultaFormatted,
-                    FechaUltimaConsulta = fechaUltimaConsultaFormatted
+                    FechaUltimaConsulta = fechaUltimaConsultaFormatted,
+
                 };
                 return result;
 
@@ -363,6 +369,10 @@ namespace Clinica_Api.Controllers
                     informacionpaciente.Poblacion = paciente.Poblacion;
                     informacionpaciente.Toxoplasmosis = paciente.Toxoplasmosis;
                     informacionpaciente.Trombosis = paciente.Trombosis;
+                    informacionpaciente.FechaActualizacion = DateTime.Today;
+                    informacionpaciente.CardiopatiaFamiliar = paciente.CardiopatiaFamiliar.Trim();
+                    informacionpaciente.HipertensionFamiliar = paciente.HipertensionFamiliar.Trim();
+                    informacionpaciente.OtraEnfermedadPersonal = paciente.OtraEnfermedadPersonal;
                     _context.PacientesInformacionGenerals.Update(informacionpaciente);
                     clave = informacionpaciente.Clave;
                 }
@@ -371,6 +381,7 @@ namespace Clinica_Api.Controllers
 
                     informacionpaciente = _context.PacientesInformacionGenerals.OrderByDescending(p => p.Clave).FirstOrDefault();
                     paciente.Clave = informacionpaciente.Clave + 1;
+                    paciente.FechaActualizacion = DateTime.Today;
                     _context.PacientesInformacionGenerals.Add(paciente);
                     clave = paciente.Clave;
 
@@ -1345,192 +1356,480 @@ namespace Clinica_Api.Controllers
 
         //#region "Imprimir Exp Completo"
 
-        //[HttpPost("CliniaOvController/PrintComplete")]
-        //public IActionResult PrintCompleteExp([FromBody] SeccionesExpedienteCompleto secciones)
-        //{
-        //    var archivo = string.Empty;
-        //    secciones.idPaciente= 10941;
-          
-        //    if (secciones.informacionGeneral)
-        //    {
-        //       var contenido = getPacienteId(secciones.idPaciente);
-        //        CreateExpedienteCompletoPdf("C:\\Users\\Rigo\\Documents\\Projects\\Expedientes_olivera_backend_api\\Clinica_Api\\Clinica_Apiexpediente.pdf",  contenido);
-        //    }
-        //    if (secciones.historia)
-        //    {
-        //        //obtener info historia
-        //    } 
-        //    if (secciones.imagenPerfil)
-        //    {
-        //       //obtener img perfil
-        //    }
-        //    if (secciones.imagenes)
-        //    {
-        //        //obtener img 
-        //    }
-        //    if (secciones.pendientes)
-        //    {
-        //     //obtener pendientes
-        //    }
-        //    if (secciones.recetas)
-        //    {
-        //        //obtener recetas
-        //    }
-        //    if (secciones.complementarios)
-        //    {
-        //        //obtener complemtearios
-        //    }
-        //    if (secciones.justificacionesInformes)
-        //    {
-        //        //obtener justificacionesInformes
-        //    }
+        private byte[] CreatePdf(int id)
+        {
+            byte[] pdf = null;
+            // Obtener información general del paciente para usar su nombre en el encabezado y en el nombre del archivo
+            PacientesInformacionGeneral paciente = JsonSerializer.Deserialize<PacientesInformacionGeneral>(JsonSerializer.Serialize(getPacienteId(id)));
 
-        //    return Ok("ok");
-
-        //           }
+            //// Crear un documento
+            Document document = new Document();
+            document.Info.Title = $"Expediente Médico de {paciente.Nombre}";
+            document.Info.Subject = "Documento generado automáticamente";
+            document.Info.Author = "AMECAE";
 
 
-     
-        //    private  void CreateExpedienteCompletoPdf(string filePath, dynamic contenido)
-        //    {
-        //        PdfSharp.Pdf.PdfDocument document = new PdfSharp.Pdf.PdfDocument();
-        //        document.Info.Title = "Expediente Completo";
+            // Crear secciones y capítulos
+            DefineSections(document);
+            AddInformacionGeneral(document, paciente);
+            AddHistoria(document, id);
+            AddRecetas(document, id);
+            AddComplementarios(document, id);
+            AddJustificacionesInformes(document, id);
 
-        //        PdfPage page = document.AddPage();
-        //        XGraphics gfx = XGraphics.FromPdfPage(page);
-        //        XFont titleFont = new XFont("Verdana", 16, XFontStyleEx.Bold);
-        //        XFont sectionFont = new XFont("Verdana", 14, XFontStyleEx.Bold);
-        //        XFont regularFont = new XFont("Verdana", 12, XFontStyleEx.Regular);
-        //        double yPosition = 20;
+            //Renderizar el PDF
+            PdfDocumentRenderer renderer = new PdfDocumentRenderer(true)
+            {
+                Document = document
+            };
+            renderer.RenderDocument();
 
-        //        // Título del Documento
-        //        gfx.DrawString("Expediente Completo", titleFont, XBrushes.Black, new XRect(0, yPosition, page.Width, page.Height), XStringFormats.TopCenter);
-        //        yPosition += 40;
+            // Guardar el PDF en un MemoryStream
+            using (MemoryStream stream = new MemoryStream())
+            {
+                renderer.Save(stream, false);
+                pdf = stream.ToArray();
+            }
 
-        //        // Información Personal y de Contacto
-        //        gfx.DrawString("Información Personal y de Contacto", sectionFont, XBrushes.Black, new XRect(20, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Nombre: {contenido.Nombre}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Fecha de Nacimiento: {contenido.FechaDeNacimiento}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Sexo: {contenido.Sexo}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Estado Civil: {contenido.EstadoCivil}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Ocupación: {contenido.Ocupacion}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Domicilio: {contenido.Domicilio}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Población: {contenido.Poblacion}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Teléfono: {contenido.Telefono}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Email: {contenido.Email}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 40;
+            // Devuelve el archivo PDF como un archivo descargable
+            return pdf;
 
-        //        // Información del Esposo/a
-        //        gfx.DrawString("Información del Esposo/a (si aplica)", sectionFont, XBrushes.Black, new XRect(20, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Nombre del Esposo/a: {contenido.NombreDelEsposo}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Edad del Esposo/a: {contenido.EdadDelEsposo}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Ocupación del Esposo/a: {contenido.OcupacionEsposo}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 40;
+        }
 
-        //        // Historial Médico y Antecedentes Familiares
-        //        gfx.DrawString("Historial Médico y Antecedentes Familiares", sectionFont, XBrushes.Black, new XRect(20, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Diabetes: {contenido.Diabetes}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Hipertensión: {contenido.Hipertension}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Trombosis: {contenido.Trombosis}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Cardiopatías: {contenido.Cardiopatias}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Cáncer: {contenido.Cancer}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Enfermedades Genéticas: {contenido.EnfermedadesGeneticas}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Otras Enfermedades: {contenido.OtraEnfermedad}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 40;
+        private void DefineSections(Document document)
+        {
+            Section section = document.AddSection();
+            section.PageSetup.PageFormat = PageFormat.A4;
+            section.PageSetup.TopMargin = "2cm";
+            section.PageSetup.BottomMargin = "2cm";
 
-        //        // Hábitos Personales
-        //        gfx.DrawString("Hábitos Personales", sectionFont, XBrushes.Black, new XRect(20, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Inmunizaciones: {contenido.Inmunizaciones}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Alcoholismo: {contenido.Alcoholismo}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Tabaquismo: {contenido.Tabaquismo}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Tabaquismo Pasivo: {contenido.TabaquismoPasivo}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Drogas o Medicamentos: {contenido.DrogasOmedicamentos}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 40;
+            // Cambiar la fuente global a Courier tamaño 12
+            var style = document.Styles["Normal"];
+            style.Font.Name = "Courier";
+            style.Font.Size = 12;
+        }
+        private void AddInformacionGeneral(Document document, PacientesInformacionGeneral paciente)
+        {
+            Section section = document.LastSection;
+            Paragraph paragraph = section.AddParagraph($"Expediente Médico: {paciente.Nombre}");
+            paragraph.Format.Font.Size = 16;
+            paragraph.Format.Font.Bold = true;
+            paragraph.Format.SpaceAfter = "1cm";
 
-        //        // Grupo Sanguíneo y Enfermedades Previas
-        //        gfx.DrawString("Grupo Sanguíneo y Enfermedades Previas", sectionFont, XBrushes.Black, new XRect(20, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Grupo Sanguíneo: {contenido.GrupoSanguineo}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Enfermedades Propias de la Infancia: {contenido.PropiasDeLaInfancia}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Rubéola: {contenido.Rubeola}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Amigdalitis: {contenido.Amigdalitis}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Bronquitis: {contenido.Bronquitis}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Bronconeumonía: {contenido.Bronconeumonia}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Hepatitis Viral Tipo: {contenido.HepatitisViralTipo}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Parásitosis: {contenido.Parasitosis}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Toxoplasmosis: {contenido.Toxoplasmosis}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Citomegalovirus: {contenido.Citomegalovirus}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Herpes: {contenido.Herpes}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Clamydiasis: {contenido.Clamydiasis}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"HIV: {contenido.Hiv}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Sífilis: {contenido.Sifilis}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Micosis: {contenido.Micosis}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"EIP: {contenido.Eip}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Diabetes Mellitus: {contenido.DiabetesMellitus}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Otras Endocrinas: {contenido.OtrasEndocrinas}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Nefropatías: {contenido.Nefropatias}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Digestivas: {contenido.Digestivas}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Neurológicas: {contenido.Neurologicas}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Hematológicas: {contenido.Hematologicas}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Tumores: {contenido.Tumores}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Condilomatosis: {contenido.Condilomatosis}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Displasias: {contenido.Displasias}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
-        //        yPosition += 20;
-        //        gfx.DrawString($"Alergia: {contenido.Alergia}", regularFont, XBrushes.Black, new XRect(40, yPosition, page.Width, page.Height), XStringFormats.TopLeft);
+            section.AddParagraph($"Fecha de Consulta: {paciente.FechaConsulta}");
+            section.AddParagraph("Fecha de Última Consulta: 17/10/2024");
 
-        //        // Guarda el documento en la ruta especificada
-        //        document.Save(filePath);
-        //    }
+            // Información Personal y de Contacto
+            section.AddParagraph("Información Personal y de Contacto").Format.Font.Bold = true;
+            section.AddParagraph($"Nombre del paciente: {paciente.Nombre}");
+            section.AddParagraph($"Fecha de nacimiento: {paciente.FechaDeNacimiento}");
+            section.AddParagraph($"Edad del paciente: {CalcularEdad(Convert.ToDateTime(paciente.FechaDeNacimiento))}");
+            section.AddParagraph($"Sexo: {paciente.Sexo}");
+            section.AddParagraph($"Estado Civil: {paciente.EstadoCivil}");
+            section.AddParagraph($"Ocupación: {paciente.Ocupacion}");
+            section.AddParagraph($"Domicilio: {paciente.Domicilio}");
+            section.AddParagraph($"Población: {paciente.Poblacion}");
+            section.AddParagraph($"Email: {paciente.Email}");
+            section.AddParagraph($"Teléfono: {paciente.Telefono}");
+            section.AddParagraph($"Referencia: {paciente.Referencia}");
 
-        //    #endregion
+            // Información del Esposo/a (si aplica)
+            section.AddParagraph("Información del Esposo/a (si aplica)").Format.Font.Bold = true;
+            section.AddParagraph($"Nombre del Esposo/a: {paciente.NombreDelEsposo}");
+            section.AddParagraph($"Edad del Esposo/a: {paciente.EdadDelEsposo}");
+            section.AddParagraph($"Ocupación del Esposo/a: {paciente.OcupacionEsposo}");
+
+            // Historial Médico y Antecedentes Familiares
+            section.AddParagraph("Historial Médico y Antecedentes Familiares").Format.Font.Bold = true;
+            section.AddParagraph($"Diabetes: {paciente.Diabetes}");
+            section.AddParagraph($"Hipertensión: {paciente.HipertensionFamiliar}");
+            section.AddParagraph($"Trombosis: {paciente.Trombosis}");
+            section.AddParagraph($"Cardiopatías: {paciente.CardiopatiaFamiliar}");
+            section.AddParagraph($"Cáncer: {paciente.Cancer}");
+            section.AddParagraph($"Enfermedades Genéticas: {paciente.EnfermedadesGeneticas}");
+            section.AddParagraph($"Otras enfermedades: {paciente.OtraEnfermedad}");
+
+            // Hábitos Personales
+            section.AddParagraph("Hábitos Personales").Format.Font.Bold = true;
+            section.AddParagraph($"Inmunizaciones: {paciente.Inmunizaciones}");
+            section.AddParagraph($"Alcoholismo: {paciente.Alcoholismo}");
+            section.AddParagraph($"Tabaquismo: {paciente.Tabaquismo}");
+            section.AddParagraph($"Tabaquismo Pasivo: {paciente.TabaquismoPasivo}");
+            section.AddParagraph($"Drogas o Medicamentos: {paciente.DrogasOmedicamentos}");
+
+            // Enfermedades Previas y Grupo Sanguíneo
+            section.AddParagraph("Grupo Sanguíneo y Enfermedades Previas").Format.Font.Bold = true;
+            section.AddParagraph($"Grupo Sanguíneo: {paciente.GrupoSanguineo}");
+            section.AddParagraph($"Enfermedades Propias de la Infancia: {paciente.PropiasDeLaInfancia}");
+            section.AddParagraph($"Rubéola: {paciente.Rubeola}");
+            section.AddParagraph($"Amigdalitis: {paciente.Amigdalitis}");
+            section.AddParagraph($"Bronquitis: {paciente.Bronquitis}");
+            section.AddParagraph($"Bronconeumonía: {paciente.Bronconeumonia}");
+            section.AddParagraph($"Hepatitis Viral: {paciente.HepatitisViralTipo}");
+            section.AddParagraph($"Parasitosis: {paciente.Parasitosis}");
+            section.AddParagraph($"Toxoplasmosis: {paciente.Toxoplasmosis}");
+            section.AddParagraph($"Citomegalovirus: {paciente.Citomegalovirus}");
+            section.AddParagraph($"Herpes: {paciente.Herpes}");
+            section.AddParagraph($"Clamydiasis: {paciente.Clamydiasis}");
+            section.AddParagraph($"HIV: {paciente.Hiv}");
+            section.AddParagraph($"Sífilis: {paciente.Sifilis}");
+            section.AddParagraph($"Micosis: {paciente.Micosis}");
+            section.AddParagraph($"EIP (Enfermedad Inflamatoria Pélvica): {paciente.Eip}");
+            section.AddParagraph($"Hipertensión: {paciente.Hipertension}");
+            section.AddParagraph($"Diabetes Mellitus: {paciente.DiabetesMellitus}");
+            section.AddParagraph($"Otras Endocrinas: {paciente.OtrasEndocrinas}");
+            section.AddParagraph($"Cardiopatías: {paciente.Cardiopatias}");
+            section.AddParagraph($"Nefropatías: {paciente.Nefropatias}");
+            section.AddParagraph($"Digestivas: {paciente.Digestivas}");
+            section.AddParagraph($"Neurológicas: {paciente.Neurologicas}");
+            section.AddParagraph($"Hematológicas: {paciente.Hematologicas}");
+            section.AddParagraph($"Tumores: {paciente.Tumores}");
+            section.AddParagraph($"Condilomatosis: {paciente.Condilomatosis}");
+            section.AddParagraph($"Displasias: {paciente.Displasias}");
+            section.AddParagraph($"Alergia: {paciente.Alergia}");
+        }
+
+        private int CalcularEdad(DateTime fechaNacimiento)
+        {
+            // Obtener la fecha actual
+            DateTime fechaActual = DateTime.Today;
+
+            // Calcular la edad básica
+            int edad = fechaActual.Year - fechaNacimiento.Year;
+
+            // Verificar si el cumpleaños ya ocurrió este año
+            if (fechaNacimiento.Date > fechaActual.AddYears(-edad))
+            {
+                edad--; // Restar uno si el cumpleaños aún no ha ocurrido en el año actual
+            }
+
+            return edad;
+        }
+
+        private void AddHistoria(Document document, int id)
+        {
+
+            // Obtener el expediente con la información
+            var expediente = getAllExpediente(id);
+
+            if (expediente != null && !string.IsNullOrEmpty(expediente.Expediente1))
+            {
+                // Obtener la sección actual y añadir el título
+                Section section = document.LastSection;
+                // Añadir un salto de página para asegurarnos de que la historia clínica comienza en una nueva página
+                section.AddPageBreak();
+                Paragraph paragraph = section.AddParagraph("Historia");
+                paragraph.Format.Font.Size = 16;
+                paragraph.Format.Font.Bold = true;
+                paragraph.Format.SpaceAfter = "1cm";
+
+
+                // Añadir el texto de Expediente1 con el formato que tiene (respetando los saltos de línea y espacios)
+                section.AddParagraph(expediente.Expediente1, "Normal");
+            }
+        }
+
+
+        private void AddRecetas(Document document, int id)
+        {
+            // Obtener la lista de recetas del paciente
+            var recetasxpaciente = getAllRecetasPaciente(id);
+
+            // Solo añadir recetas si existen
+            if (recetasxpaciente != null && recetasxpaciente.Count > 0)
+            {
+                // Añadir un salto de página para que las recetas comiencen en una nueva página
+                Section section = document.LastSection;
+                section.AddPageBreak();
+
+                // Añadir el título de la sección "Recetas"
+                Paragraph paragraph = section.AddParagraph("Recetas");
+                paragraph.Format.Font.Size = 16;
+                paragraph.Format.Font.Bold = true;
+                paragraph.Format.SpaceAfter = "1cm";
+
+                // Iterar sobre las recetas y añadir cada una al documento
+                foreach (var receta in recetasxpaciente)
+                {
+                    // Agregar la fecha de la receta
+                    section.AddParagraph($"Fecha: {receta.Fecha}");
+
+                    // Procesar el contenido HTML para eliminar las etiquetas y convertirlas en saltos de línea
+                    string recetaLimpia = LimpiarHtml(receta.Receta);
+
+                    // Agregar el contenido de la receta respetando los saltos de línea
+                    section.AddParagraph(recetaLimpia);
+
+                    // Añadir un pequeño espacio después de cada receta
+                    section.AddParagraph("\n");
+                }
+            }
+        }
+
+        // Método auxiliar para limpiar el HTML y convertir etiquetas a saltos de línea
+        private string LimpiarHtml(string? receta)
+        {
+            if (string.IsNullOrEmpty(receta)) return string.Empty;
+
+            // Reemplazar etiquetas HTML comunes por saltos de línea o espacios
+            receta = receta.Replace("<br>", "\n").Replace("<br/>", "\n");
+            receta = receta.Replace("<p>", "").Replace("</p>", "\n");
+
+            // Remover otras posibles etiquetas HTML (si las hay)
+            receta = System.Text.RegularExpressions.Regex.Replace(receta, "<.*?>", string.Empty);
+
+            return receta.Trim(); // Remover espacios extra al inicio o al final
+        }
+
+        private void AddComplementarios(Document document, int id)
+        {
+            // Obtener la lista de complementarios (imágenes) del paciente
+            var complementarios = getAllDocumento(id);
+
+            // Solo añadir complementarios si existen
+            if (complementarios != null && complementarios.Count > 0)
+            {
+                // Iterar sobre los complementarios y añadir cada imagen al documento
+                foreach (var complementario in complementarios)
+                {
+                    if (complementario.BlobData != null && complementario.BlobData.Length > 0)
+                    {
+                        // Crear una nueva sección para cada imagen (una imagen por página)
+                        Section section = document.AddSection();
+
+                        // Ajustar márgenes mínimos para maximizar el espacio de la imagen
+                        section.PageSetup.TopMargin = Unit.FromCentimeter(0.0);
+                        section.PageSetup.BottomMargin = Unit.FromCentimeter(0.0);
+                        section.PageSetup.LeftMargin = Unit.FromCentimeter(0.0);
+                        section.PageSetup.RightMargin = Unit.FromCentimeter(0.0);
+
+                        // Convertir el blob de datos de la imagen a base64 y luego a imagen
+                        string imageBase64 = Convert.ToBase64String(complementario.BlobData);
+                        string imagePath = $"base64:{imageBase64}"; // Ruta de la imagen en base64
+
+                        // Añadir la imagen a la sección
+                        var image = section.AddImage(imagePath);
+
+                        // Desbloquear la proporción para poder ajustar el tamaño completo
+                        image.LockAspectRatio = false;
+
+                        // Ajustar el tamaño de la imagen para que ocupe toda la página sin márgenes
+                        image.Width = section.PageSetup.PageWidth;
+                        image.Height = section.PageSetup.PageHeight;
+                    }
+                }
+            }
+        }
+        private void AddJustificacionesInformes(Document document, int id)
+        {
+
+            // Obtener el informe del expediente basado en el ID
+            var informeExpediente = getAllInformeExpediente(id);
+
+            if (informeExpediente != null && !string.IsNullOrEmpty(informeExpediente.Informe))
+            {
+                // Crear una nueva sección con los márgenes ajustados (igual que el caso de las historias)
+                Section section = document.AddSection();
+                section.PageSetup.TopMargin = Unit.FromCentimeter(2.5);
+                section.PageSetup.BottomMargin = Unit.FromCentimeter(2.5);
+                section.PageSetup.LeftMargin = Unit.FromCentimeter(2.5);
+                section.PageSetup.RightMargin = Unit.FromCentimeter(2.5);
+
+                // Agregar el título de "Justificaciones e Informes"
+                Paragraph paragraph = section.AddParagraph("Justificaciones e Informes");
+                paragraph.Format.Font.Size = 16;
+                paragraph.Format.Font.Bold = true;
+                paragraph.Format.SpaceAfter = "1cm";
+                // Limpiar el texto del informe para eliminar las etiquetas HTML
+                string informeLimpio = LimpiarHtml(informeExpediente.Informe);
+
+                // Agregar el informe limpio al PDF respetando la estructura
+                section.AddParagraph(informeLimpio);
+            }
+        }
+
+        [HttpGet("CliniaOvController/PrintCompleteFile/{id:int}")]
+        public IActionResult PrintCompleteExp(int id)
+        {
+            try
+            {
+                var pdf = CreatePdf(id);
+                return Ok(File(pdf, "application/pdf", "downloaded_file.pdf"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+
+        #region "Seccion Justificaciones, Configuraciones y asociacion a expediente"
+        [HttpGet("CliniaOvController/GetAllJustificacion")]
+        public IActionResult GetAllJustificacion()
+        {
+            List<PlantillaJustificacion> plantillaJustificacions = new List<PlantillaJustificacion>();
+            try
+            {
+                plantillaJustificacions = _context.PlantillaJustificacions.ToList();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "No se pudo guardar la información del paciente. Error: " + ex.Message);
+            }
+            return Ok(plantillaJustificacions);
+        }
+
+        [HttpPost("CliniaOvController/PostJustificacionplantilla")]
+        public IActionResult PostJustificacionplantilla([FromBody] PlantillaJustificacion justificacionplantilla)
+        {
+            List<PlantillaJustificacion> justificaciones = null;
+            if (justificacionplantilla == null)
+            {
+                return NotFound();
+            }
+            // Guarda los cambios en la base de datos.
+            try
+            {
+                if (justificacionplantilla.Id > 0)
+                    _context.Update(justificacionplantilla);
+                else
+                    _context.Add(justificacionplantilla);
+
+                _context.SaveChanges();
+                justificaciones = _context.PlantillaJustificacions.ToList();
+            }
+            catch (Exception ex)
+            {
+                // Maneja cualquier error que pueda ocurrir durante el guardado.
+                return StatusCode(500, "No se pudo guardar la información del paciente. Error: " + ex.Message);
+            }
+
+            return Ok(justificaciones);
+        }
+
+        [HttpPost("CliniaOvController/PostJustificacionplantillaDelete")]
+        public IActionResult PostJustificacionplantillaDelete([FromBody] PlantillaJustificacion justificacionplantilla)
+        {
+            List<PlantillaJustificacion> justificacion = new List<PlantillaJustificacion>();
+            if (justificacionplantilla == null)
+            {
+                return NotFound();
+            }
+            // Guarda los cambios en la base de datos.
+            try
+            {
+                if (justificacionplantilla.Id > 0)
+                    _context.Remove(justificacionplantilla);
+
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                // Maneja cualquier error que pueda ocurrir durante el guardado.
+                return StatusCode(500, "No se pudo guardar la información del paciente. Error: " + ex.Message);
+            }
+
+            return Ok(justificacion);
+        }
+
+        [HttpGet("CliniaOvController/GetJustificacion/{id:int}")]
+        public IActionResult GetJustificacion(int id)
+        {
+
+            Justificacion justificacion = new Justificacion();
+            try
+            {
+                justificacion = getAllJustificacion(id);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "No se pudo obtener la información del paciente. Error: " + ex.Message);
+            }
+
+            return Ok(justificacion);
+        }
+
+        [HttpPost("CliniaOvController/PostJustificacion")]
+        public IActionResult PostJustificacion([FromBody] Justificacion justificacion)
+        {
+            if (justificacion == null)
+            {
+                return NotFound();
+            }
+            //Guarda los cambios en la base de datos.
+            try
+            {
+                if (justificacion.Id > 0)
+                    _context.Update(justificacion);
+                else
+                    _context.Add(justificacion);
+
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                //Maneja cualquier error que pueda ocurrir durante el guardado.
+                return StatusCode(500, "No se pudo guardar la información del paciente. Error: " + ex.Message);
+            }
+
+            return Ok(justificacion);
+        }
+
+        [HttpPost("CliniaOvController/PostjustificacionDelete")]
+        public IActionResult PostjustificacionDelete([FromBody] Justificacion justificacion)
+        {
+            Justificacion justificacionresult = null;
+            if (justificacion == null)
+            {
+                return NotFound();
+            }
+            // Guarda los cambios en la base de datos.
+            try
+            {
+                if (justificacion.Id > 0)
+                    _context.Remove(justificacion);
+
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                // Maneja cualquier error que pueda ocurrir durante el guardado.
+                return StatusCode(500, "No se pudo guardar la información del paciente. Error: " + ex.Message);
+            }
+
+            return Ok(justificacionresult);
+        }
+        private Justificacion getAllJustificacion(int id)
+        {
+            Justificacion justificacion = new Justificacion();
+            try
+            {
+                justificacion = _context.Justificacions.Where(x => x.Clave == id).FirstOrDefault();
+
+            }
+            catch (Exception ex)
+            {
+                return justificacion;
+            }
+            return justificacion;
+        }
+
+        #endregion
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1578,6 +1877,6 @@ namespace Clinica_Api.Controllers
         }
 
 
-        
+
     }
 }

@@ -14,4 +14,10 @@ public partial class TratamientosEnfermedade
     public string? Tratamiento { get; set; }
 
     public string? PalabrasClaves { get; set; }
+
+    public DateTime? FechaCreacion { get; set; }
+
+    public DateTime? FechaActualizacion { get; set; }
+
+    public string? Usuario { get; set; }
 }

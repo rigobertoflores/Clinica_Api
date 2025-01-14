@@ -114,4 +114,12 @@ public partial class PacientesInformacionGeneral
     public DateTime? FechaConsulta { get; set; }
 
     public DateTime? FechaUltimaConsulta { get; set; }
+
+    public DateTime? FechaActualizacion { get; set; }
+
+    public string? HipertensionFamiliar { get; set; }
+
+    public string? CardiopatiaFamiliar { get; set; }
+
+    public string? OtraEnfermedadPersonal { get; set; }
 }
